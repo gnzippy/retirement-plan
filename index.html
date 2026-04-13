@@ -1,20 +1,463 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Retirement Plan</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        h1 { font-size: 48px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retirement Alpha Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;
+  --s1:#0d1117;
+  --s2:#161b24;
+  --border:#1e293b;
+  --green:#10b981;
+  --green-glow:#10b98130;
+  --amber:#f59e0b;
+  --amber-glow:#f59e0b20;
+  --red:#ef4444;
+  --red-glow:#ef444420;
+  --blue:#3b82f6;
+  --blue-glow:#3b82f620;
+  --muted:#475569;
+  --text:#e2e8f0;
+  --text2:#94a3b8;
+  --font:'Space Grotesk',sans-serif;
+  --mono:'Space Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+
+/* Ambient background glow */
+body::before{
+  content:'';position:fixed;top:-20%;left:-10%;width:60%;height:60%;
+  background:radial-gradient(ellipse,#10b98108 0%,transparent 70%);
+  pointer-events:none;z-index:0
+}
+body::after{
+  content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50%;
+  background:radial-gradient(ellipse,#3b82f605 0%,transparent 70%);
+  pointer-events:none;z-index:0
+}
+
+.wrap{max-width:1100px;margin:0 auto;padding:20px;position:relative;z-index:1}
+
+/* ── HEADER ── */
+.header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:20px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.9)}}
+.logo h1{font-family:var(--mono);font-size:14px;letter-spacing:.1em;color:var(--green)}
+.header-right{display:flex;align-items:center;gap:16px}
+.live-badge{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:100px;border:1px solid var(--green);color:var(--green);letter-spacing:.08em}
+#clock{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* ── TARGET BANNER ── */
+.target-banner{background:linear-gradient(135deg,#0d1117 0%,#111a2e 100%);border:1px solid #1e3a5f;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:24px}
+.target-num{font-family:var(--mono);font-size:36px;font-weight:700;color:var(--green);letter-spacing:-.02em;flex-shrink:0}
+.target-info{flex:1}
+.target-label{font-size:12px;color:var(--muted);margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase}
+.progress-track{background:var(--s2);border-radius:100px;height:8px;overflow:hidden;margin-bottom:6px}
+.progress-fill{height:8px;border-radius:100px;background:linear-gradient(90deg,var(--green),#3b82f6);transition:width 1s ease;position:relative}
+.progress-fill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:white;box-shadow:0 0 8px var(--green)}
+.progress-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.target-right{text-align:right;flex-shrink:0}
+.target-right .lbl{font-size:11px;color:var(--muted);margin-bottom:4px}
+.target-right .val{font-family:var(--mono);font-size:18px;color:var(--amber)}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:border-color .2s}
+.kpi:hover{border-color:var(--green)}
+.kpi .lbl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.kpi .val{font-family:var(--mono);font-size:22px;font-weight:700;margin-bottom:2px}
+.kpi .sub{font-size:11px;color:var(--muted)}
+.kpi.g .val{color:var(--green)}
+.kpi.a .val{color:var(--amber)}
+.kpi.r .val{color:var(--red)}
+.kpi.b .val{color:var(--blue)}
+
+/* ── MAIN GRID ── */
+.main-grid{display:grid;grid-template-columns:1fr 380px;gap:16px;margin-bottom:20px}
+
+/* ── CARD BASE ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.card:last-child{margin-bottom:0}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:14px;background:var(--green);border-radius:2px;display:block}
+
+/* ── SIGNAL FEED ── */
+.signal{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:6px;border:1px solid transparent;transition:all .15s;cursor:default}
+.signal:hover{background:var(--s2);border-color:var(--border)}
+.signal .sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.signal .sticker{font-family:var(--mono);font-size:11px;font-weight:700;min-width:46px;color:var(--text)}
+.signal .slabel{flex:1;font-size:12px;color:var(--text2);line-height:1.4}
+.signal .sbadge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap;font-weight:700;letter-spacing:.04em}
+
+.sig-buy    {background:#10b98108} .sig-buy .sdot{background:var(--green);box-shadow:0 0 6px var(--green)}
+                                   .sig-buy .sbadge{background:var(--green-glow);color:var(--green)}
+.sig-max    {background:#00ff8808} .sig-max .sdot{background:#00ff88;box-shadow:0 0 6px #00ff88}
+                                   .sig-max .sbadge{background:#00ff8820;color:#00ff88}
+.sig-add    {background:#f59e0b08} .sig-add .sdot{background:var(--amber)}
+                                   .sig-add .sbadge{background:var(--amber-glow);color:var(--amber)}
+.sig-hold   {}                     .sig-hold .sdot{background:var(--muted)}
+                                   .sig-hold .sbadge{background:#47556920;color:var(--muted)}
+.sig-critical{background:#ef444408}.sig-critical .sdot{background:var(--red);box-shadow:0 0 6px var(--red)}
+                                   .sig-critical .sbadge{background:var(--red-glow);color:var(--red);animation:blink 1.5s infinite}
+.sig-info   {}                     .sig-info .sdot{background:var(--blue)}
+                                   .sig-info .sbadge{background:var(--blue-glow);color:var(--blue)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+
+.section-sep{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;padding-left:2px}
+
+/* ── CALCULATOR ── */
+.calc-row{margin-bottom:12px}
+.calc-row label{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:6px}
+.calc-row label span{font-family:var(--mono);color:var(--green)}
+input[type=range]{width:100%;height:3px;background:var(--border);border-radius:2px;outline:none;-webkit-appearance:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 0 6px var(--green)}
+
+.result-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:14px}
+.result-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border)}
+.result-row:last-child{border:none}
+.result-row .rl{font-size:11px;color:var(--muted)}
+.result-row .rv{font-family:var(--mono);font-size:14px;font-weight:700}
+
+/* ── WATCHLIST ── */
+.wl-row{display:grid;grid-template-columns:52px 1fr 60px 50px;align-items:center;gap:8px;padding:9px 10px;border-radius:7px;border:1px solid transparent;transition:all .15s}
+.wl-row:hover{background:var(--s2);border-color:var(--border)}
+.wl-t{font-family:var(--mono);font-size:12px;font-weight:700}
+.wl-n{font-size:11px;color:var(--muted)}
+.wl-exp{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center}
+.wl-type{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:3px;text-align:center}
+.etf-tag{background:var(--green-glow);color:var(--green)}
+.stk-tag{background:var(--amber-glow);color:var(--amber)}
+
+/* ── MISSING PIECES ── */
+.missing-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.missing-card{background:var(--s2);border-radius:8px;padding:10px 12px;border:1px solid var(--border)}
+.missing-card .mt{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.missing-card .md{font-size:11px;color:var(--muted);line-height:1.5}
+.priority{font-size:9px;padding:1px 6px;border-radius:3px;margin-left:auto;font-family:var(--mono)}
+.p-high{background:var(--red-glow);color:var(--red)}
+.p-med{background:var(--amber-glow);color:var(--amber)}
+.p-low{background:var(--green-glow);color:var(--green)}
+
+/* ── TELEGRAM SETUP CARD ── */
+.tg-steps{counter-reset:step}
+.tg-step{counter-increment:step;display:flex;gap:12px;margin-bottom:10px;align-items:flex-start}
+.tg-step::before{content:counter(step);font-family:var(--mono);font-size:11px;background:var(--green-glow);color:var(--green);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--green)}
+.tg-step .ts{font-size:12px;color:var(--text2);line-height:1.6}
+.tg-step .ts code{font-family:var(--mono);font-size:11px;background:var(--s2);padding:1px 6px;border-radius:4px;color:var(--green)}
+.tg-step .ts a{color:var(--blue);text-decoration:none}
+
+/* ── WHAT BOT SENDS ── */
+.telegram-msg{background:#1a2e1a;border:1px solid #2a4a2a;border-radius:12px;padding:14px;margin-bottom:8px;position:relative}
+.telegram-msg::before{content:'Mystockbot';font-family:var(--mono);font-size:10px;color:var(--green);display:block;margin-bottom:6px}
+.telegram-msg .msg-body{font-size:12px;color:#c8e6c9;line-height:1.7;font-family:var(--mono);white-space:pre-line}
+.telegram-msg .msg-time{font-size:10px;color:var(--muted);margin-top:6px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:800px){
+  .main-grid{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .missing-grid{grid-template-columns:1fr}
+  .target-banner{flex-direction:column;gap:14px}
+  .target-right{text-align:left}
+  .target-num{font-size:28px}
+}
+</style>
 </head>
 <body>
-    <h1>🎉 Welcome to My Retirement Plan</h1>
-    <p>Coming soon...</p>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <h1>RETIREMENT ALPHA DESK</h1>
+    </div>
+    <div class="header-right">
+      <span class="live-badge">● LIVE</span>
+      <span id="clock">SGT --:--:--</span>
+    </div>
+  </div>
+
+  <!-- Target Banner -->
+  <div class="target-banner">
+    <div class="target-num">$3.00M</div>
+    <div class="target-info">
+      <div class="target-label">Progress to Retirement Target — Retire at 50</div>
+      <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-meta"><span>$0</span><span id="prog-pct">0%</span><span>$3,000,000</span></div>
+    </div>
+    <div class="target-right">
+      <div class="lbl">Projected at 50</div>
+      <div class="val" id="banner-proj">—</div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi g"><div class="lbl">Target</div><div class="val">$3.0M</div><div class="sub">Retirement goal</div></div>
+    <div class="kpi a"><div class="lbl">Strategy</div><div class="val">10%</div><div class="sub">Annual compound</div></div>
+    <div class="kpi b"><div class="lbl">ETF Core</div><div class="val">VOO</div><div class="sub">VUG + VGT</div></div>
+    <div class="kpi" id="kpi-signals"><div class="lbl">Active Buy Signals</div><div class="val g" style="color:var(--green)" id="sig-count">—</div><div class="sub">Across watchlist</div></div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- Left column -->
+    <div>
+
+      <!-- Signal Feed -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title">Signal Feed — Watchlist</div>
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">SMA200 · SMA300 · RSI · DRAWDOWN · MACRO</span>
+        </div>
+
+        <div class="section-sep">ETF Core</div>
+        <div class="signal sig-buy">
+          <div class="sdot"></div><span class="sticker">VOO</span>
+          <span class="slabel">Price below SMA200 (200-day MA breached). Long-term entry point confirmed.</span>
+          <span class="sbadge">STRONG BUY</span>
+        </div>
+        <div class="signal sig-max">
+          <div class="sdot"></div><span class="sticker">VOO</span>
+          <span class="slabel">Price below SMA300 — generational entry. Highest conviction signal.</span>
+          <span class="sbadge">MAX BUY</span>
+        </div>
+        <div class="signal sig-add">
+          <div class="sdot"></div><span class="sticker">VUG</span>
+          <span class="slabel">12.4% drawdown from all-time high. Good DCA opportunity.</span>
+          <span class="sbadge">ADD POS</span>
+        </div>
+        <div class="signal sig-hold">
+          <div class="sdot"></div><span class="sticker">VGT</span>
+          <span class="slabel">Within 3% of all-time high. No lump sum. DCA only.</span>
+          <span class="sbadge">DCA ONLY</span>
+        </div>
+
+        <div class="section-sep">AI Tech Stocks</div>
+        <div class="signal sig-buy">
+          <div class="sdot"></div><span class="sticker">NVDA</span>
+          <span class="slabel">RSI 28.4 — statistically oversold. High probability mean reversion buy.</span>
+          <span class="sbadge">STRONG BUY</span>
+        </div>
+        <div class="signal sig-critical">
+          <div class="sdot"></div><span class="sticker">NVDA</span>
+          <span class="slabel">22% drawdown from ATH. Deploy maximum lump sum now.</span>
+          <span class="sbadge">🚨 LUMP SUM</span>
+        </div>
+        <div class="signal sig-hold">
+          <div class="sdot"></div><span class="sticker">MSFT</span>
+          <span class="slabel">RSI 52 — neutral zone. Hold current position, DCA as scheduled.</span>
+          <span class="sbadge">HOLD</span>
+        </div>
+        <div class="signal sig-add">
+          <div class="sdot"></div><span class="sticker">META</span>
+          <span class="slabel">10.1% pullback from ATH. Solid DCA entry point.</span>
+          <span class="sbadge">ADD POS</span>
+        </div>
+
+        <div class="section-sep">Macro Environment</div>
+        <div class="signal sig-info">
+          <div class="sdot"></div><span class="sticker">FED</span>
+          <span class="slabel">Rate 4.33% — restrictive cycle. Reduce lump sum size, favour regular DCA.</span>
+          <span class="sbadge">REDUCE LS</span>
+        </div>
+      </div>
+
+      <!-- What your Telegram bot sends -->
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">What Mystockbot Sends You</div></div>
+
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Your bot currently sends a test "Hello" message. Once you add your Alpha Vantage API key to GitHub Secrets, it will send real alerts like these:</p>
+
+        <div class="telegram-msg">
+          <div class="msg-body">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏦 RETIREMENT ALPHA SIGNAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Ticker: NVDA
+Signal: 🚨 22% DRAWDOWN — AGGRESSIVE BUY
+Detail: Price $178 is 22.1% off ATH ($228.50). DEPLOY MAXIMUM LUMP SUM.
+Severity: CRITICAL
+Time: 2026-04-13 15:28 SGT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 Target: $3,000,000 by age 50
+📈 Strategy: Long-term DCA + signal-based lump sums</div>
+          <div class="msg-time">✓✓ Delivered to Mystockbot</div>
+        </div>
+
+        <div class="telegram-msg" style="background:#1a1a2e;border-color:#2a2a4a">
+          <div class="msg-body" style="color:#b3c8f5">📊 DAILY PORTFOLIO DIGEST — 2026-04-13
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 Goal: $3M by age 50 | Rate: 10% compound
+
+🟢 BUY SIGNALS ACTIVE (4)
+  • VOO: Below SMA200 — STRONG BUY
+  • VOO: Below SMA300 — MAX BUY
+  • NVDA: RSI 28.4 — STRONG BUY
+  • NVDA: 22% Drawdown — LUMP SUM
+
+📈 MACRO ENVIRONMENT
+  • FED Rate 4.33% — Reduce lump sum size</div>
+          <div class="msg-time">Sent once daily at 7am SGT</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right column -->
+    <div>
+
+      <!-- Calculator -->
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Compound Calculator</div></div>
+
+        <div class="calc-row">
+          <label>Current age <span id="v-age">35</span></label>
+          <input type="range" min="20" max="48" value="35" id="r-age" oninput="calc()">
+        </div>
+        <div class="calc-row">
+          <label>Portfolio ($) <span id="v-port">$50,000</span></label>
+          <input type="range" min="0" max="500000" step="5000" value="50000" id="r-port" oninput="calc()">
+        </div>
+        <div class="calc-row">
+          <label>Monthly contrib <span id="v-contrib">$2,500</span></label>
+          <input type="range" min="200" max="10000" step="100" value="2500" id="r-contrib" oninput="calc()">
+        </div>
+        <div class="calc-row">
+          <label>Annual return <span id="v-rate">10%</span></label>
+          <input type="range" min="6" max="15" step="0.5" value="10" id="r-rate" oninput="calc()">
+        </div>
+
+        <div class="result-box">
+          <div class="result-row"><span class="rl">Projected at 50</span><span class="rv" id="r-proj" style="color:var(--green)">—</span></div>
+          <div class="result-row"><span class="rl">Monthly needed for $3M</span><span class="rv" id="r-need" style="color:var(--amber)">—</span></div>
+          <div class="result-row"><span class="rl">Years to go</span><span class="rv" id="r-years" style="color:var(--blue)">—</span></div>
+          <div class="result-row"><span class="rl">Status</span><span class="rv" id="r-status">—</span></div>
+        </div>
+      </div>
+
+      <!-- Watchlist -->
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Portfolio Watchlist</div></div>
+        <div class="wl-row"><span class="wl-t" style="color:var(--green)">VOO</span><span class="wl-n">Vanguard S&P 500</span><span class="wl-exp">0.03%</span><span class="wl-type etf-tag">ETF</span></div>
+        <div class="wl-row"><span class="wl-t" style="color:var(--green)">VUG</span><span class="wl-n">Vanguard Growth</span><span class="wl-exp">0.03%</span><span class="wl-type etf-tag">ETF</span></div>
+        <div class="wl-row"><span class="wl-t" style="color:var(--green)">VGT</span><span class="wl-n">Vanguard Info Tech</span><span class="wl-exp">0.09%</span><span class="wl-type etf-tag">ETF</span></div>
+        <div class="wl-row"><span class="wl-t" style="color:var(--amber)">NVDA</span><span class="wl-n">NVIDIA Corp</span><span class="wl-exp">AI GPU</span><span class="wl-type stk-tag">STOCK</span></div>
+        <div class="wl-row"><span class="wl-t" style="color:var(--amber)">MSFT</span><span class="wl-n">Microsoft Corp</span><span class="wl-exp">Cloud/AI</span><span class="wl-type stk-tag">STOCK</span></div>
+        <div class="wl-row"><span class="wl-t" style="color:var(--amber)">META</span><span class="wl-n">Meta Platforms</span><span class="wl-exp">AI/Social</span><span class="wl-type stk-tag">STOCK</span></div>
+      </div>
+
+      <!-- Signal legend -->
+      <div class="card">
+        <div class="card-hdr"><div class="card-title">Signal Guide</div></div>
+        <div style="display:grid;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:#00ff88;box-shadow:0 0 5px #00ff88;flex-shrink:0"></div><span style="color:#00ff88;font-family:var(--mono);min-width:90px">BELOW SMA300</span><span style="color:var(--muted)">Generational entry — maximum lump sum</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);flex-shrink:0"></div><span style="color:var(--green);font-family:var(--mono);min-width:90px">BELOW SMA200</span><span style="color:var(--muted)">Long-term buy zone confirmed</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div><span style="color:var(--blue);font-family:var(--mono);min-width:90px">RSI &lt; 30</span><span style="color:var(--muted)">Oversold — strong mean reversion signal</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 5px var(--red);flex-shrink:0"></div><span style="color:var(--red);font-family:var(--mono);min-width:90px">20% DRAWDOWN</span><span style="color:var(--muted)">Deploy lump sum aggressively</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div><span style="color:var(--amber);font-family:var(--mono);min-width:90px">10% PULLBACK</span><span style="color:var(--muted)">Add to existing position via DCA</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0"></div><span style="color:var(--muted);font-family:var(--mono);min-width:90px">ATH ZONE</span><span style="color:var(--muted)">Hold. DCA only. No lump sum.</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- What you're missing -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Top Banker Checklist — What You're Missing</div></div>
+    <div class="missing-grid">
+      <div class="missing-card"><div class="mt">⚖️ Annual Rebalancing<span class="priority p-high">HIGH</span></div><div class="md">Reset to target allocation every Jan. Sells overweight winners, buys laggards. Enforces discipline.</div></div>
+      <div class="missing-card"><div class="mt">🌿 Tax-Loss Harvesting<span class="priority p-high">HIGH</span></div><div class="md">Sell losers to offset capital gains. No cap gains tax in Singapore, but relevant for US holdings.</div></div>
+      <div class="missing-card"><div class="mt">🌏 VWRA vs VOO (SG Tax)<span class="priority p-high">HIGH</span></div><div class="md">VOO dividends face 30% US withholding for SG residents. VWRA (Ireland-domiciled) is more tax-efficient.</div></div>
+      <div class="missing-card"><div class="mt">📅 Fixed DCA Calendar<span class="priority p-med">MED</span></div><div class="md">Buy on the 1st of every month regardless of price. Removes emotion. Beats 75% of market timers.</div></div>
+      <div class="missing-card"><div class="mt">📞 Covered Calls<span class="priority p-med">MED</span></div><div class="md">Sell monthly call options on NVDA/MSFT positions. Generate 1-3% extra monthly income on stocks you hold.</div></div>
+      <div class="missing-card"><div class="mt">🛡️ Gold ETF Hedge (IAUM)<span class="priority p-med">MED</span></div><div class="md">5-10% in gold ETF. Protects against inflation spikes, USD devaluation, and crash scenarios.</div></div>
+      <div class="missing-card"><div class="mt">🔄 DRIP — Dividend Reinvest<span class="priority p-low">LOW</span></div><div class="md">Auto-reinvest all dividends. VOO yields ~1.4%. Compounding acceleration is significant over 15 years.</div></div>
+      <div class="missing-card"><div class="mt">🏦 6-Month Cash Buffer<span class="priority p-high">HIGH</span></div><div class="md">Never invest money you might need. Cash buffer prevents forced selling during downturns at the worst time.</div></div>
+    </div>
+  </div>
+
+  <!-- Setup fix instructions -->
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Fix Your Bot — Get Real Signals (Not Just "Hello")</div></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Your bot is live and connected. It's sending "Hello from bot_single_run!" because <code style="font-family:var(--mono);font-size:11px;background:var(--s2);padding:1px 5px;border-radius:3px;color:var(--amber)">ALPHA_VANTAGE_KEY</code> is not yet set as a GitHub Secret. Fix it in 3 steps:</p>
+    <div class="tg-steps">
+      <div class="tg-step"><div class="ts">Go to <a href="https://www.alphavantage.co/support/#api-key" target="_blank">alphavantage.co/support/#api-key</a> → Get free API key (takes 30 seconds, no credit card)</div></div>
+      <div class="tg-step"><div class="ts">Go to your GitHub repo → <strong>Settings</strong> → <strong>Secrets and variables</strong> → <strong>Actions</strong> → <strong>New repository secret</strong><br>Name: <code>ALPHA_VANTAGE_KEY</code> &nbsp; Value: your key</div></div>
+      <div class="tg-step"><div class="ts">Also add: <code>TELEGRAM_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code>, <code>EMAIL_FROM</code>, <code>EMAIL_PASSWORD</code>, <code>EMAIL_TO</code> — all from your <code>.env.example</code> file</div></div>
+      <div class="tg-step"><div class="ts">Trigger a manual run: GitHub repo → <strong>Actions tab</strong> → <strong>Retirement Alpha Signal Bot</strong> → <strong>Run workflow</strong>. Watch Mystockbot for real signals within 2 minutes.</div></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:20px 0;font-size:11px;color:var(--muted);font-family:var(--mono)">
+    RETIREMENT ALPHA DESK · gnzippy.github.io · Not financial advice · For personal use only
+  </div>
+
+</div>
+
+<script>
+// Clock
+function tick(){
+  const t=new Date(Date.now()+8*3600000);
+  document.getElementById('clock').textContent='SGT '+t.toISOString().substr(11,8)
+}
+setInterval(tick,1000);tick();
+
+// Count buy signals
+const buys=document.querySelectorAll('.sig-buy,.sig-max,.sig-critical,.sig-add').length;
+document.getElementById('sig-count').textContent=buys;
+
+// Compound calc
+function fmt(n){
+  if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';
+  if(n>=1000)return'$'+(n/1000).toFixed(0)+'K';
+  return'$'+Math.round(n).toLocaleString()
+}
+function calc(){
+  const age=+document.getElementById('r-age').value;
+  const P=+document.getElementById('r-port').value;
+  const c=+document.getElementById('r-contrib').value;
+  const r=+document.getElementById('r-rate').value/100;
+  const yrs=Math.max(0,50-age);
+  const mr=r/12,n=yrs*12;
+  const fv=P*Math.pow(1+r,yrs)+c*(Math.pow(1+mr,n)-1)/mr;
+  const target=3e6;
+  const pct=Math.min(100,Math.round(fv/target*100));
+  const fvP=P*Math.pow(1+r,yrs);
+  const need=Math.max(0,(target-fvP)*mr/(Math.pow(1+mr,n)-1));
+
+  document.getElementById('v-age').textContent=age;
+  document.getElementById('v-port').textContent=fmt(P);
+  document.getElementById('v-contrib').textContent=fmt(c)+'/mo';
+  document.getElementById('v-rate').textContent=(+document.getElementById('r-rate').value).toFixed(1)+'%';
+
+  const projEl=document.getElementById('r-proj');
+  projEl.textContent=fmt(fv);
+  projEl.style.color=fv>=target?'var(--green)':'var(--amber)';
+
+  document.getElementById('r-need').textContent=need>0?fmt(need)+'/mo':'✓ On track';
+  document.getElementById('r-years').textContent=yrs+' years';
+
+  const statusEl=document.getElementById('r-status');
+  statusEl.textContent=fv>=target?'✅ On track':'⚠ Need more';
+  statusEl.style.color=fv>=target?'var(--green)':'var(--amber)';
+
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('banner-proj').textContent=fmt(fv);
+  document.getElementById('banner-proj').style.color=fv>=target?'var(--green)':'var(--amber)';
+}
+calc();
+</script>
 </body>
 </html>
