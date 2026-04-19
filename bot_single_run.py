@@ -7,7 +7,21 @@ TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 ALPHA_KEY        = os.environ.get("ALPHA_VANTAGE_KEY", "")
 
-WATCHLIST = ["VOO", "VUG", "VGT", "NVDA", "MSFT", "META"]
+WATCHLIST = WATCHLIST = {
+    "VOO":   {"name": "Vanguard S&P 500 ETF",    "type": "ETF",   "expense": 0.03},
+    "VUG":   {"name": "Vanguard Growth ETF",       "type": "ETF",   "expense": 0.03},
+    "VGT":   {"name": "Vanguard Info Tech ETF",    "type": "ETF",   "expense": 0.09},
+    "QQQ":   {"name": "Invesco NASDAQ 100",        "type": "ETF",   "expense": 0.20},
+    "SCHD":  {"name": "Schwab Dividend ETF",       "type": "ETF",   "expense": 0.06},
+    "AAPL":  {"name": "Apple Inc",                 "type": "STOCK", "sector": "Consumer Tech"},
+    "GOOGL": {"name": "Alphabet Inc",              "type": "STOCK", "sector": "AI/Ads"},
+    "AMZN":  {"name": "Amazon",                    "type": "STOCK", "sector": "Cloud/Retail"},
+    "META":  {"name": "Meta Platforms",            "type": "STOCK", "sector": "AI/Social"},
+    "MSFT":  {"name": "Microsoft Corp",            "type": "STOCK", "sector": "Cloud/AI"},
+    "NVDA":  {"name": "NVIDIA Corp",               "type": "STOCK", "sector": "AI Chips"},
+    "TSLA":  {"name": "Tesla Inc",                 "type": "STOCK", "sector": "EV/Energy"},
+    "NFLX":  {"name": "Netflix Inc",               "type": "STOCK", "sector": "Streaming"},
+}
 
 def send_telegram(msg):
     if not TELEGRAM_TOKEN:
