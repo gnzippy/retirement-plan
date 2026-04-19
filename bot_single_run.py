@@ -7,7 +7,7 @@ TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 ALPHA_KEY        = os.environ.get("ALPHA_VANTAGE_KEY", "")
 
-WATCHLIST = WATCHLIST = {
+WATCHLIST = {
     "VOO":   {"name": "Vanguard S&P 500 ETF",    "type": "ETF",   "expense": 0.03},
     "VUG":   {"name": "Vanguard Growth ETF",       "type": "ETF",   "expense": 0.03},
     "VGT":   {"name": "Vanguard Info Tech ETF",    "type": "ETF",   "expense": 0.09},
@@ -106,6 +106,19 @@ def analyse(ticker):
         signals.append(f"🟡 {ticker}: {drawdown:.1f}% PULLBACK — ADD POSITION\nPrice ${price:.2f} is {drawdown:.1f}% off ATH (${ath:.2f})")
     elif drawdown < 2:
         signals.append(f"⚪ {ticker}: NEAR ATH — DCA ONLY\nPrice ${price:.2f} within {drawdown:.1f}% of ATH. No lump sum.")
+
+    # Weekly dip check
+    if len(prices) >= 5:
+        price_5d_ago = prices[4]
+        weekly_drop = ((price_5d_ago - price) / price_5d_ago) * 100
+        if weekly_drop >= 15:
+            signals.append(f"📉 {ticker}: {weekly_drop:.1f}% WEEKLY DIP — STRONG BUY\nPrice fell {weekly_drop:.1f}% in 5 days. Aggressive add opportunity.")
+        elif weekly_drop >= 10:
+            signals.append(f"🟡 {ticker}: {weekly_drop:.1f}% WEEKLY DIP — ADD POSITION\nPrice fell {weekly_drop:.1f}% in 5 days. Good DCA entry.")
+        elif weekly_drop >= 5:
+            signals.append(f"👀 {ticker}: {weekly_drop:.1f}% WEEKLY DIP — WATCH\nPrice fell {weekly_drop:.1f}% in 5 days. Monitor closely.")
+
+    return signals
 
     return signals
 
