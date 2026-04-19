@@ -5,429 +5,576 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Retirement Alpha Desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#07090f;
-  --s1:#0d1117;
-  --s2:#161b24;
-  --border:#1e293b;
-  --green:#10b981;
-  --green-glow:#10b98130;
-  --amber:#f59e0b;
-  --amber-glow:#f59e0b20;
-  --red:#ef4444;
-  --red-glow:#ef444420;
-  --blue:#3b82f6;
-  --blue-glow:#3b82f620;
-  --muted:#475569;
-  --text:#e2e8f0;
-  --text2:#94a3b8;
-  --font:'Space Grotesk',sans-serif;
-  --mono:'Space Mono',monospace;
+  --bg:#080c0a;
+  --s1:#0e1410;
+  --s2:#141c16;
+  --border:#1f2e22;
+  --green:#3ddc84;
+  --green2:#1a9e55;
+  --amber:#e8a838;
+  --red:#e05252;
+  --blue:#5b9cf6;
+  --muted:#5a7560;
+  --text:#d4e8d8;
+  --text2:#8aab8e;
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+  --serif:'Fraunces',serif;
 }
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse 60% 40% at 20% 10%,#0d2e1808 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 80% 90%,#1a3d1f06 0%,transparent 60%);pointer-events:none;z-index:0}
 
-/* Ambient background glow */
-body::before{
-  content:'';position:fixed;top:-20%;left:-10%;width:60%;height:60%;
-  background:radial-gradient(ellipse,#10b98108 0%,transparent 70%);
-  pointer-events:none;z-index:0
-}
-body::after{
-  content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50%;
-  background:radial-gradient(ellipse,#3b82f605 0%,transparent 70%);
-  pointer-events:none;z-index:0
-}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 20px;position:relative;z-index:1}
 
-.wrap{max-width:1100px;margin:0 auto;padding:20px;position:relative;z-index:1}
-
-/* ── HEADER ── */
-.header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:20px}
-.logo{display:flex;align-items:center;gap:12px}
-.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.9)}}
-.logo h1{font-family:var(--mono);font-size:14px;letter-spacing:.1em;color:var(--green)}
+/* HEADER */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.logo h1{font-family:var(--serif);font-size:22px;font-weight:300;color:var(--green);letter-spacing:-.01em}
+.logo p{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px;letter-spacing:.08em}
 .header-right{display:flex;align-items:center;gap:16px}
-.live-badge{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:100px;border:1px solid var(--green);color:var(--green);letter-spacing:.08em}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 #clock{font-family:var(--mono);font-size:12px;color:var(--muted)}
 
-/* ── TARGET BANNER ── */
-.target-banner{background:linear-gradient(135deg,#0d1117 0%,#111a2e 100%);border:1px solid #1e3a5f;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:24px}
-.target-num{font-family:var(--mono);font-size:36px;font-weight:700;color:var(--green);letter-spacing:-.02em;flex-shrink:0}
-.target-info{flex:1}
-.target-label{font-size:12px;color:var(--muted);margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase}
-.progress-track{background:var(--s2);border-radius:100px;height:8px;overflow:hidden;margin-bottom:6px}
-.progress-fill{height:8px;border-radius:100px;background:linear-gradient(90deg,var(--green),#3b82f6);transition:width 1s ease;position:relative}
-.progress-fill::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:white;box-shadow:0 0 8px var(--green)}
-.progress-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
-.target-right{text-align:right;flex-shrink:0}
-.target-right .lbl{font-size:11px;color:var(--muted);margin-bottom:4px}
-.target-right .val{font-family:var(--mono);font-size:18px;color:var(--amber)}
+/* TARGET BANNER */
+.banner{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:22px 28px;margin-bottom:20px;display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:center}
+.banner-num{font-family:var(--serif);font-size:42px;font-weight:300;color:var(--green);letter-spacing:-.03em}
+.banner-label{font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.prog-track{background:var(--s2);border-radius:100px;height:6px;overflow:hidden}
+.prog-fill{height:6px;border-radius:100px;background:linear-gradient(90deg,var(--green2),var(--green));transition:width 1s ease}
+.prog-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--mono)}
+.banner-proj .lbl{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px}
+.banner-proj .val{font-family:var(--serif);font-size:24px;font-weight:300}
 
-/* ── KPI ROW ── */
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.kpi{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:border-color .2s}
-.kpi:hover{border-color:var(--green)}
-.kpi .lbl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
-.kpi .val{font-family:var(--mono);font-size:22px;font-weight:700;margin-bottom:2px}
-.kpi .sub{font-size:11px;color:var(--muted)}
-.kpi.g .val{color:var(--green)}
-.kpi.a .val{color:var(--amber)}
-.kpi.r .val{color:var(--red)}
-.kpi.b .val{color:var(--blue)}
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:20px;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:4px}
+.tab{flex:1;font-size:12px;padding:8px;cursor:pointer;border-radius:7px;color:var(--muted);background:none;border:none;font-family:var(--sans);transition:all .2s;font-weight:400;letter-spacing:.02em}
+.tab.active{background:var(--s2);color:var(--green);border:1px solid var(--border)}
+.panel{display:none}.panel.active{display:block}
 
-/* ── MAIN GRID ── */
-.main-grid{display:grid;grid-template-columns:1fr 380px;gap:16px;margin-bottom:20px}
+/* KPI ROW */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.kpi .kl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;font-family:var(--mono)}
+.kpi .kv{font-family:var(--mono);font-size:20px;font-weight:500;margin-bottom:2px}
+.kpi .ks{font-size:11px;color:var(--muted)}
+.g{color:var(--green)}.a{color:var(--amber)}.r{color:var(--red)}.b{color:var(--blue)}
 
-/* ── CARD BASE ── */
-.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
-.card:last-child{margin-bottom:0}
-.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.card-title{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
-.card-title::before{content:'';width:3px;height:14px;background:var(--green);border-radius:2px;display:block}
+/* SIGNAL FEED */
+.signal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sig-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .2s}
+.sig-card:hover{border-color:var(--green2)}
+.sig-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.sig-ticker{font-family:var(--mono);font-size:18px;font-weight:500}
+.sig-badge{font-size:10px;padding:3px 10px;border-radius:100px;font-family:var(--mono);font-weight:500;letter-spacing:.06em}
+.badge-buy{background:#1a3d22;color:var(--green);border:1px solid var(--green2)}
+.badge-watch{background:#2e2610;color:var(--amber);border:1px solid #7a5a1a}
+.badge-hold{background:var(--s2);color:var(--muted);border:1px solid var(--border)}
+.badge-bull{background:#0d2e1a;color:var(--green)}
+.badge-neutral{background:#1e2210;color:var(--amber)}
+.badge-bear{background:#2e1010;color:var(--red)}
+.sig-label{font-size:13px;color:var(--text);margin-bottom:4px;font-weight:500}
+.sig-detail{font-size:12px;color:var(--text2);line-height:1.5}
+.sig-metrics{display:flex;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.sig-metric{text-align:center}
+.sig-metric .ml{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.sig-metric .mv{font-size:13px;font-weight:500;font-family:var(--mono)}
+.verdict-bar{display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;border-radius:8px;background:var(--s2)}
+.verdict-icon{font-size:16px}
+.verdict-text{font-size:12px;font-weight:500}
 
-/* ── SIGNAL FEED ── */
-.signal{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:6px;border:1px solid transparent;transition:all .15s;cursor:default}
-.signal:hover{background:var(--s2);border-color:var(--border)}
-.signal .sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.signal .sticker{font-family:var(--mono);font-size:11px;font-weight:700;min-width:46px;color:var(--text)}
-.signal .slabel{flex:1;font-size:12px;color:var(--text2);line-height:1.4}
-.signal .sbadge{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap;font-weight:700;letter-spacing:.04em}
+/* STOCK DETAIL MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:#000000cc;z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:20px;width:90%;max-width:680px;max-height:85vh;overflow-y:auto;padding:28px}
+.modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+.modal-ticker{font-family:var(--serif);font-size:32px;font-weight:300;color:var(--green)}
+.modal-name{font-size:13px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+.modal-close{background:var(--s2);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.section-title{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.metric-box{background:var(--s2);border-radius:10px;padding:12px;text-align:center}
+.metric-box .ml{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:4px}
+.metric-box .mv{font-size:18px;font-weight:500;font-family:var(--mono)}
+.metric-box .md{font-size:11px;color:var(--muted);margin-top:3px}
+.analysis-block{margin-bottom:18px}
+.analysis-block h4{font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500}
+.analysis-block p{font-size:13px;color:var(--text);line-height:1.6}
+.verdict-full{border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid}
+.verdict-bull{background:#0a2014;border-color:var(--green2)}
+.verdict-neutral{background:#1e1e08;border-color:#6b5a1a}
+.verdict-bear{background:#200a0a;border-color:#7a2020}
+.verdict-full .vt{font-size:14px;font-weight:500;margin-bottom:6px}
+.verdict-full .vd{font-size:12px;line-height:1.6;color:var(--text2)}
+.key-metrics-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.key-metrics-table th{text-align:left;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:6px 0;border-bottom:1px solid var(--border);font-weight:400}
+.key-metrics-table td{padding:8px 0;border-bottom:1px solid var(--border);color:var(--text)}
+.key-metrics-table tr:last-child td{border:none}
+.key-metrics-table .good{color:var(--green)}.key-metrics-table .warn{color:var(--amber)}.key-metrics-table .bad{color:var(--red)}
 
-.sig-buy    {background:#10b98108} .sig-buy .sdot{background:var(--green);box-shadow:0 0 6px var(--green)}
-                                   .sig-buy .sbadge{background:var(--green-glow);color:var(--green)}
-.sig-max    {background:#00ff8808} .sig-max .sdot{background:#00ff88;box-shadow:0 0 6px #00ff88}
-                                   .sig-max .sbadge{background:#00ff8820;color:#00ff88}
-.sig-add    {background:#f59e0b08} .sig-add .sdot{background:var(--amber)}
-                                   .sig-add .sbadge{background:var(--amber-glow);color:var(--amber)}
-.sig-hold   {}                     .sig-hold .sdot{background:var(--muted)}
-                                   .sig-hold .sbadge{background:#47556920;color:var(--muted)}
-.sig-critical{background:#ef444408}.sig-critical .sdot{background:var(--red);box-shadow:0 0 6px var(--red)}
-                                   .sig-critical .sbadge{background:var(--red-glow);color:var(--red);animation:blink 1.5s infinite}
-.sig-info   {}                     .sig-info .sdot{background:var(--blue)}
-                                   .sig-info .sbadge{background:var(--blue-glow);color:var(--blue)}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+/* NEWS PANEL */
+.news-grid{display:flex;flex-direction:column;gap:0}
+.news-item{padding:14px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start}
+.news-item:last-child{border:none}
+.news-ticker-badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:5px;background:var(--s2);color:var(--muted);border:1px solid var(--border);white-space:nowrap;margin-top:2px}
+.news-title{font-size:13px;color:var(--text);line-height:1.5;margin-bottom:4px}
+.news-meta{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.news-sentiment{font-size:10px;padding:2px 8px;border-radius:100px;white-space:nowrap;margin-top:2px;font-family:var(--mono)}
+.sent-pos{background:#0d2e1a;color:var(--green)}.sent-neg{background:#200a0a;color:var(--red)}.sent-neu{background:var(--s2);color:var(--muted)}
 
-.section-sep{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;padding-left:2px}
-
-/* ── CALCULATOR ── */
-.calc-row{margin-bottom:12px}
-.calc-row label{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:6px}
-.calc-row label span{font-family:var(--mono);color:var(--green)}
+/* CALC */
+.calc-wrap{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:600px;margin:0 auto}
+.calc-row{margin-bottom:16px}
+.calc-row label{display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:8px}
+.calc-row label span{font-family:var(--mono);color:var(--green);font-weight:500}
 input[type=range]{width:100%;height:3px;background:var(--border);border-radius:2px;outline:none;-webkit-appearance:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--green);cursor:pointer;box-shadow:0 0 6px var(--green)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--green);cursor:pointer}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.res-card{background:var(--s2);border-radius:10px;padding:14px;border:1px solid var(--border)}
+.res-card .rl{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:6px}
+.res-card .rv{font-family:var(--serif);font-size:22px;font-weight:300}
+.tax-note{background:#1a1800;border:1px solid #3d3200;border-radius:10px;padding:12px;margin-top:16px;font-size:12px;color:#b8a840;line-height:1.6}
 
-.result-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:14px}
-.result-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--border)}
-.result-row:last-child{border:none}
-.result-row .rl{font-size:11px;color:var(--muted)}
-.result-row .rv{font-family:var(--mono);font-size:14px;font-weight:700}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.fbtn{font-size:11px;padding:5px 12px;border-radius:100px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--muted);font-family:var(--mono);transition:all .15s}
+.fbtn.on{background:var(--green);color:#000;border-color:var(--green)}
 
-/* ── WATCHLIST ── */
-.wl-row{display:grid;grid-template-columns:52px 1fr 60px 50px;align-items:center;gap:8px;padding:9px 10px;border-radius:7px;border:1px solid transparent;transition:all .15s}
-.wl-row:hover{background:var(--s2);border-color:var(--border)}
-.wl-t{font-family:var(--mono);font-size:12px;font-weight:700}
-.wl-n{font-size:11px;color:var(--muted)}
-.wl-exp{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center}
-.wl-type{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:3px;text-align:center}
-.etf-tag{background:var(--green-glow);color:var(--green)}
-.stk-tag{background:var(--amber-glow);color:var(--amber)}
-
-/* ── MISSING PIECES ── */
-.missing-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.missing-card{background:var(--s2);border-radius:8px;padding:10px 12px;border:1px solid var(--border)}
-.missing-card .mt{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:6px}
-.missing-card .md{font-size:11px;color:var(--muted);line-height:1.5}
-.priority{font-size:9px;padding:1px 6px;border-radius:3px;margin-left:auto;font-family:var(--mono)}
-.p-high{background:var(--red-glow);color:var(--red)}
-.p-med{background:var(--amber-glow);color:var(--amber)}
-.p-low{background:var(--green-glow);color:var(--green)}
-
-/* ── TELEGRAM SETUP CARD ── */
-.tg-steps{counter-reset:step}
-.tg-step{counter-increment:step;display:flex;gap:12px;margin-bottom:10px;align-items:flex-start}
-.tg-step::before{content:counter(step);font-family:var(--mono);font-size:11px;background:var(--green-glow);color:var(--green);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--green)}
-.tg-step .ts{font-size:12px;color:var(--text2);line-height:1.6}
-.tg-step .ts code{font-family:var(--mono);font-size:11px;background:var(--s2);padding:1px 6px;border-radius:4px;color:var(--green)}
-.tg-step .ts a{color:var(--blue);text-decoration:none}
-
-/* ── WHAT BOT SENDS ── */
-.telegram-msg{background:#1a2e1a;border:1px solid #2a4a2a;border-radius:12px;padding:14px;margin-bottom:8px;position:relative}
-.telegram-msg::before{content:'Mystockbot';font-family:var(--mono);font-size:10px;color:var(--green);display:block;margin-bottom:6px}
-.telegram-msg .msg-body{font-size:12px;color:#c8e6c9;line-height:1.7;font-family:var(--mono);white-space:pre-line}
-.telegram-msg .msg-time{font-size:10px;color:var(--muted);margin-top:6px}
-
-/* ── RESPONSIVE ── */
-@media(max-width:800px){
-  .main-grid{grid-template-columns:1fr}
-  .kpi-row{grid-template-columns:1fr 1fr}
-  .missing-grid{grid-template-columns:1fr}
-  .target-banner{flex-direction:column;gap:14px}
-  .target-right{text-align:left}
-  .target-num{font-size:28px}
+@media(max-width:700px){
+  .signal-grid{grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .banner{grid-template-columns:1fr;gap:14px}
+  .metrics-grid{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- Header -->
-  <div class="header">
-    <div class="logo">
-      <div class="logo-dot"></div>
-      <h1>RETIREMENT ALPHA DESK</h1>
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <h1>Retirement Alpha Desk</h1>
+    <p>FAANG + ETF Signal Intelligence · SGT</p>
+  </div>
+  <div class="header-right">
+    <div class="live-dot"></div>
+    <span id="clock">--:--:--</span>
+  </div>
+</div>
+
+<!-- BANNER -->
+<div class="banner">
+  <div class="banner-num">$3.00M</div>
+  <div>
+    <div class="banner-label">Progress to retirement target — retire at 50</div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-meta"><span>$0</span><span id="prog-pct">0%</span><span>$3,000,000</span></div>
+  </div>
+  <div class="banner-proj">
+    <div class="lbl">PROJECTED AT 50</div>
+    <div class="val g" id="banner-proj">—</div>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpis">
+  <div class="kpi"><div class="kl">Buy signals</div><div class="kv g" id="k-buy">5</div><div class="ks">act now</div></div>
+  <div class="kpi"><div class="kl">Watch signals</div><div class="kv a" id="k-watch">4</div><div class="ks">approaching</div></div>
+  <div class="kpi"><div class="kl">Tickers tracked</div><div class="kv b">13</div><div class="ks">FAANG + ETFs</div></div>
+  <div class="kpi"><div class="kl">Fed rate</div><div class="kv a">4.33%</div><div class="ks">restrictive</div></div>
+  <div class="kpi"><div class="kl">Market mood</div><div class="kv a">Cautious</div><div class="ks">favour DCA</div></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('signals')">Signals</button>
+  <button class="tab" onclick="showTab('analysis')">Stock Analysis</button>
+  <button class="tab" onclick="showTab('news')">News</button>
+  <button class="tab" onclick="showTab('calc')">Calculator</button>
+</div>
+
+<!-- SIGNALS PANEL -->
+<div class="panel active" id="panel-signals">
+  <div class="filter-bar">
+    <button class="fbtn on" onclick="filterSig('all',this)">All</button>
+    <button class="fbtn" onclick="filterSig('buy',this)">Buy only</button>
+    <button class="fbtn" onclick="filterSig('etf',this)">ETFs</button>
+    <button class="fbtn" onclick="filterSig('stock',this)">Stocks</button>
+  </div>
+  <div class="signal-grid" id="sig-grid"></div>
+</div>
+
+<!-- ANALYSIS PANEL -->
+<div class="panel" id="panel-analysis">
+  <div class="filter-bar">
+    <button class="fbtn on" onclick="filterAnalysis('all',this)">All</button>
+    <button class="fbtn" onclick="filterAnalysis('bullish',this)">Bullish</button>
+    <button class="fbtn" onclick="filterAnalysis('neutral',this)">Neutral</button>
+    <button class="fbtn" onclick="filterAnalysis('bearish',this)">Bearish</button>
+  </div>
+  <div class="signal-grid" id="analysis-grid"></div>
+</div>
+
+<!-- NEWS PANEL -->
+<div class="panel" id="panel-news">
+  <p style="font-size:12px;color:var(--muted);margin-bottom:16px;font-family:var(--mono)">Latest news affecting your watchlist. Connect NewsAPI key in GitHub Secrets for live updates.</p>
+  <div class="news-grid" id="news-feed"></div>
+</div>
+
+<!-- CALC PANEL -->
+<div class="panel" id="panel-calc">
+  <div class="calc-wrap">
+    <div class="calc-row">
+      <label>Current portfolio <span id="vp">$50,000</span></label>
+      <input type="range" min="0" max="500000" step="5000" value="50000" id="rp" oninput="calc()">
     </div>
-    <div class="header-right">
-      <span class="live-badge">● LIVE</span>
-      <span id="clock">SGT --:--:--</span>
+    <div class="calc-row">
+      <label>Monthly contribution <span id="vc">$2,500/mo</span></label>
+      <input type="range" min="200" max="15000" step="100" value="2500" id="rc" oninput="calc()">
+    </div>
+    <div class="calc-row">
+      <label>Expected annual return <span id="vr">10%</span></label>
+      <input type="range" min="6" max="15" step="0.5" value="10" id="rr" oninput="calc()">
+    </div>
+    <div class="calc-row">
+      <label>Your current age <span id="va">36</span></label>
+      <input type="range" min="25" max="48" value="36" id="ra" oninput="calc()">
+    </div>
+    <div class="prog-track" style="margin-top:8px"><div class="prog-fill" id="cprog" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--mono)"><span>$0</span><span id="cpct">0%</span><span>$3M</span></div>
+    <div class="result-grid">
+      <div class="res-card"><div class="rl">PROJECTED AT 50</div><div class="rv g" id="r-proj">—</div></div>
+      <div class="res-card"><div class="rl">MONTHLY NEEDED</div><div class="rv a" id="r-need">—</div></div>
+      <div class="res-card"><div class="rl">YEARS REMAINING</div><div class="rv b" id="r-yrs">—</div></div>
+      <div class="res-card"><div class="rl">STATUS</div><div class="rv" id="r-stat">—</div></div>
+    </div>
+    <div class="tax-note">
+      ⚠️ <strong>Singapore tax tip:</strong> VOO dividends are hit with 30% US withholding tax for SG residents. Consider <strong>VWRA</strong> (Vanguard FTSE All-World, Ireland-domiciled) — same exposure, lower tax drag. Significant difference over 14 years of compounding.
     </div>
   </div>
-
-  <!-- Target Banner -->
-  <div class="target-banner">
-    <div class="target-num">$3.00M</div>
-    <div class="target-info">
-      <div class="target-label">Progress to Retirement Target — Retire at 50</div>
-      <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
-      <div class="progress-meta"><span>$0</span><span id="prog-pct">0%</span><span>$3,000,000</span></div>
-    </div>
-    <div class="target-right">
-      <div class="lbl">Projected at 50</div>
-      <div class="val" id="banner-proj">—</div>
-    </div>
-  </div>
-
-  <!-- KPIs -->
-  <div class="kpi-row">
-    <div class="kpi g"><div class="lbl">Target</div><div class="val">$3.0M</div><div class="sub">Retirement goal</div></div>
-    <div class="kpi a"><div class="lbl">Strategy</div><div class="val">10%</div><div class="sub">Annual compound</div></div>
-    <div class="kpi b"><div class="lbl">ETF Core</div><div class="val">VOO</div><div class="sub">VUG + VGT</div></div>
-    <div class="kpi" id="kpi-signals"><div class="lbl">Active Buy Signals</div><div class="val g" style="color:var(--green)" id="sig-count">—</div><div class="sub">Across watchlist</div></div>
-  </div>
-
-  <!-- Main Grid -->
-  <div class="main-grid">
-
-    <!-- Left column -->
-    <div>
-
-      <!-- Signal Feed -->
-      <div class="card">
-        <div class="card-hdr">
-          <div class="card-title">Signal Feed — Watchlist</div>
-          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">SMA200 · SMA300 · RSI · DRAWDOWN · MACRO</span>
-        </div>
-
-        <div class="section-sep">ETF Core</div>
-        <div class="signal sig-buy">
-          <div class="sdot"></div><span class="sticker">VOO</span>
-          <span class="slabel">Price below SMA200 (200-day MA breached). Long-term entry point confirmed.</span>
-          <span class="sbadge">STRONG BUY</span>
-        </div>
-        <div class="signal sig-max">
-          <div class="sdot"></div><span class="sticker">VOO</span>
-          <span class="slabel">Price below SMA300 — generational entry. Highest conviction signal.</span>
-          <span class="sbadge">MAX BUY</span>
-        </div>
-        <div class="signal sig-add">
-          <div class="sdot"></div><span class="sticker">VUG</span>
-          <span class="slabel">12.4% drawdown from all-time high. Good DCA opportunity.</span>
-          <span class="sbadge">ADD POS</span>
-        </div>
-        <div class="signal sig-hold">
-          <div class="sdot"></div><span class="sticker">VGT</span>
-          <span class="slabel">Within 3% of all-time high. No lump sum. DCA only.</span>
-          <span class="sbadge">DCA ONLY</span>
-        </div>
-
-        <div class="section-sep">AI Tech Stocks</div>
-        <div class="signal sig-buy">
-          <div class="sdot"></div><span class="sticker">NVDA</span>
-          <span class="slabel">RSI 28.4 — statistically oversold. High probability mean reversion buy.</span>
-          <span class="sbadge">STRONG BUY</span>
-        </div>
-        <div class="signal sig-critical">
-          <div class="sdot"></div><span class="sticker">NVDA</span>
-          <span class="slabel">22% drawdown from ATH. Deploy maximum lump sum now.</span>
-          <span class="sbadge">🚨 LUMP SUM</span>
-        </div>
-        <div class="signal sig-hold">
-          <div class="sdot"></div><span class="sticker">MSFT</span>
-          <span class="slabel">RSI 52 — neutral zone. Hold current position, DCA as scheduled.</span>
-          <span class="sbadge">HOLD</span>
-        </div>
-        <div class="signal sig-add">
-          <div class="sdot"></div><span class="sticker">META</span>
-          <span class="slabel">10.1% pullback from ATH. Solid DCA entry point.</span>
-          <span class="sbadge">ADD POS</span>
-        </div>
-
-        <div class="section-sep">Macro Environment</div>
-        <div class="signal sig-info">
-          <div class="sdot"></div><span class="sticker">FED</span>
-          <span class="slabel">Rate 4.33% — restrictive cycle. Reduce lump sum size, favour regular DCA.</span>
-          <span class="sbadge">REDUCE LS</span>
-        </div>
-      </div>
-
-      <!-- What your Telegram bot sends -->
-      <div class="card">
-        <div class="card-hdr"><div class="card-title">What Mystockbot Sends You</div></div>
-
-        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Your bot currently sends a test "Hello" message. Once you add your Alpha Vantage API key to GitHub Secrets, it will send real alerts like these:</p>
-
-        <div class="telegram-msg">
-          <div class="msg-body">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏦 RETIREMENT ALPHA SIGNAL
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Ticker: NVDA
-Signal: 🚨 22% DRAWDOWN — AGGRESSIVE BUY
-Detail: Price $178 is 22.1% off ATH ($228.50). DEPLOY MAXIMUM LUMP SUM.
-Severity: CRITICAL
-Time: 2026-04-13 15:28 SGT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 Target: $3,000,000 by age 50
-📈 Strategy: Long-term DCA + signal-based lump sums</div>
-          <div class="msg-time">✓✓ Delivered to Mystockbot</div>
-        </div>
-
-        <div class="telegram-msg" style="background:#1a1a2e;border-color:#2a2a4a">
-          <div class="msg-body" style="color:#b3c8f5">📊 DAILY PORTFOLIO DIGEST — 2026-04-13
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 Goal: $3M by age 50 | Rate: 10% compound
-
-🟢 BUY SIGNALS ACTIVE (4)
-  • VOO: Below SMA200 — STRONG BUY
-  • VOO: Below SMA300 — MAX BUY
-  • NVDA: RSI 28.4 — STRONG BUY
-  • NVDA: 22% Drawdown — LUMP SUM
-
-📈 MACRO ENVIRONMENT
-  • FED Rate 4.33% — Reduce lump sum size</div>
-          <div class="msg-time">Sent once daily at 7am SGT</div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Right column -->
-    <div>
-
-      <!-- Calculator -->
-      <div class="card">
-        <div class="card-hdr"><div class="card-title">Compound Calculator</div></div>
-
-        <div class="calc-row">
-          <label>Current age <span id="v-age">35</span></label>
-          <input type="range" min="20" max="48" value="35" id="r-age" oninput="calc()">
-        </div>
-        <div class="calc-row">
-          <label>Portfolio ($) <span id="v-port">$50,000</span></label>
-          <input type="range" min="0" max="500000" step="5000" value="50000" id="r-port" oninput="calc()">
-        </div>
-        <div class="calc-row">
-          <label>Monthly contrib <span id="v-contrib">$2,500</span></label>
-          <input type="range" min="200" max="10000" step="100" value="2500" id="r-contrib" oninput="calc()">
-        </div>
-        <div class="calc-row">
-          <label>Annual return <span id="v-rate">10%</span></label>
-          <input type="range" min="6" max="15" step="0.5" value="10" id="r-rate" oninput="calc()">
-        </div>
-
-        <div class="result-box">
-          <div class="result-row"><span class="rl">Projected at 50</span><span class="rv" id="r-proj" style="color:var(--green)">—</span></div>
-          <div class="result-row"><span class="rl">Monthly needed for $3M</span><span class="rv" id="r-need" style="color:var(--amber)">—</span></div>
-          <div class="result-row"><span class="rl">Years to go</span><span class="rv" id="r-years" style="color:var(--blue)">—</span></div>
-          <div class="result-row"><span class="rl">Status</span><span class="rv" id="r-status">—</span></div>
-        </div>
-      </div>
-
-      <!-- Watchlist -->
-      <div class="card">
-        <div class="card-hdr"><div class="card-title">Portfolio Watchlist</div></div>
-        <div class="wl-row"><span class="wl-t" style="color:var(--green)">VOO</span><span class="wl-n">Vanguard S&P 500</span><span class="wl-exp">0.03%</span><span class="wl-type etf-tag">ETF</span></div>
-        <div class="wl-row"><span class="wl-t" style="color:var(--green)">VUG</span><span class="wl-n">Vanguard Growth</span><span class="wl-exp">0.03%</span><span class="wl-type etf-tag">ETF</span></div>
-        <div class="wl-row"><span class="wl-t" style="color:var(--green)">VGT</span><span class="wl-n">Vanguard Info Tech</span><span class="wl-exp">0.09%</span><span class="wl-type etf-tag">ETF</span></div>
-        <div class="wl-row"><span class="wl-t" style="color:var(--amber)">NVDA</span><span class="wl-n">NVIDIA Corp</span><span class="wl-exp">AI GPU</span><span class="wl-type stk-tag">STOCK</span></div>
-        <div class="wl-row"><span class="wl-t" style="color:var(--amber)">MSFT</span><span class="wl-n">Microsoft Corp</span><span class="wl-exp">Cloud/AI</span><span class="wl-type stk-tag">STOCK</span></div>
-        <div class="wl-row"><span class="wl-t" style="color:var(--amber)">META</span><span class="wl-n">Meta Platforms</span><span class="wl-exp">AI/Social</span><span class="wl-type stk-tag">STOCK</span></div>
-      </div>
-
-      <!-- Signal legend -->
-      <div class="card">
-        <div class="card-hdr"><div class="card-title">Signal Guide</div></div>
-        <div style="display:grid;gap:6px">
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:#00ff88;box-shadow:0 0 5px #00ff88;flex-shrink:0"></div><span style="color:#00ff88;font-family:var(--mono);min-width:90px">BELOW SMA300</span><span style="color:var(--muted)">Generational entry — maximum lump sum</span></div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);flex-shrink:0"></div><span style="color:var(--green);font-family:var(--mono);min-width:90px">BELOW SMA200</span><span style="color:var(--muted)">Long-term buy zone confirmed</span></div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0"></div><span style="color:var(--blue);font-family:var(--mono);min-width:90px">RSI &lt; 30</span><span style="color:var(--muted)">Oversold — strong mean reversion signal</span></div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 5px var(--red);flex-shrink:0"></div><span style="color:var(--red);font-family:var(--mono);min-width:90px">20% DRAWDOWN</span><span style="color:var(--muted)">Deploy lump sum aggressively</span></div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0"></div><span style="color:var(--amber);font-family:var(--mono);min-width:90px">10% PULLBACK</span><span style="color:var(--muted)">Add to existing position via DCA</span></div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:11px"><div style="width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0"></div><span style="color:var(--muted);font-family:var(--mono);min-width:90px">ATH ZONE</span><span style="color:var(--muted)">Hold. DCA only. No lump sum.</span></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- What you're missing -->
-  <div class="card">
-    <div class="card-hdr"><div class="card-title">Top Banker Checklist — What You're Missing</div></div>
-    <div class="missing-grid">
-      <div class="missing-card"><div class="mt">⚖️ Annual Rebalancing<span class="priority p-high">HIGH</span></div><div class="md">Reset to target allocation every Jan. Sells overweight winners, buys laggards. Enforces discipline.</div></div>
-      <div class="missing-card"><div class="mt">🌿 Tax-Loss Harvesting<span class="priority p-high">HIGH</span></div><div class="md">Sell losers to offset capital gains. No cap gains tax in Singapore, but relevant for US holdings.</div></div>
-      <div class="missing-card"><div class="mt">🌏 VWRA vs VOO (SG Tax)<span class="priority p-high">HIGH</span></div><div class="md">VOO dividends face 30% US withholding for SG residents. VWRA (Ireland-domiciled) is more tax-efficient.</div></div>
-      <div class="missing-card"><div class="mt">📅 Fixed DCA Calendar<span class="priority p-med">MED</span></div><div class="md">Buy on the 1st of every month regardless of price. Removes emotion. Beats 75% of market timers.</div></div>
-      <div class="missing-card"><div class="mt">📞 Covered Calls<span class="priority p-med">MED</span></div><div class="md">Sell monthly call options on NVDA/MSFT positions. Generate 1-3% extra monthly income on stocks you hold.</div></div>
-      <div class="missing-card"><div class="mt">🛡️ Gold ETF Hedge (IAUM)<span class="priority p-med">MED</span></div><div class="md">5-10% in gold ETF. Protects against inflation spikes, USD devaluation, and crash scenarios.</div></div>
-      <div class="missing-card"><div class="mt">🔄 DRIP — Dividend Reinvest<span class="priority p-low">LOW</span></div><div class="md">Auto-reinvest all dividends. VOO yields ~1.4%. Compounding acceleration is significant over 15 years.</div></div>
-      <div class="missing-card"><div class="mt">🏦 6-Month Cash Buffer<span class="priority p-high">HIGH</span></div><div class="md">Never invest money you might need. Cash buffer prevents forced selling during downturns at the worst time.</div></div>
-    </div>
-  </div>
-
-  <!-- Setup fix instructions -->
-  <div class="card">
-    <div class="card-hdr"><div class="card-title">Fix Your Bot — Get Real Signals (Not Just "Hello")</div></div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Your bot is live and connected. It's sending "Hello from bot_single_run!" because <code style="font-family:var(--mono);font-size:11px;background:var(--s2);padding:1px 5px;border-radius:3px;color:var(--amber)">ALPHA_VANTAGE_KEY</code> is not yet set as a GitHub Secret. Fix it in 3 steps:</p>
-    <div class="tg-steps">
-      <div class="tg-step"><div class="ts">Go to <a href="https://www.alphavantage.co/support/#api-key" target="_blank">alphavantage.co/support/#api-key</a> → Get free API key (takes 30 seconds, no credit card)</div></div>
-      <div class="tg-step"><div class="ts">Go to your GitHub repo → <strong>Settings</strong> → <strong>Secrets and variables</strong> → <strong>Actions</strong> → <strong>New repository secret</strong><br>Name: <code>ALPHA_VANTAGE_KEY</code> &nbsp; Value: your key</div></div>
-      <div class="tg-step"><div class="ts">Also add: <code>TELEGRAM_TOKEN</code>, <code>TELEGRAM_CHAT_ID</code>, <code>EMAIL_FROM</code>, <code>EMAIL_PASSWORD</code>, <code>EMAIL_TO</code> — all from your <code>.env.example</code> file</div></div>
-      <div class="tg-step"><div class="ts">Trigger a manual run: GitHub repo → <strong>Actions tab</strong> → <strong>Retirement Alpha Signal Bot</strong> → <strong>Run workflow</strong>. Watch Mystockbot for real signals within 2 minutes.</div></div>
-    </div>
-  </div>
-
-  <div style="text-align:center;padding:20px 0;font-size:11px;color:var(--muted);font-family:var(--mono)">
-    RETIREMENT ALPHA DESK · gnzippy.github.io · Not financial advice · For personal use only
-  </div>
+</div>
 
 </div>
 
+<!-- STOCK DETAIL MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-body"></div>
+</div>
+
 <script>
-// Clock
-function tick(){
-  const t=new Date(Date.now()+8*3600000);
-  document.getElementById('clock').textContent='SGT '+t.toISOString().substr(11,8)
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const SIGNALS = [
+  {ticker:'NVDA',name:'NVIDIA Corp',type:'STOCK',signal:'BUY',label:'RSI 27 + 18% drawdown',detail:'Two signals firing simultaneously. Oversold and significantly off peak.',metrics:{rsi:'27.4',drawdown:'18.2%',sma:'Below 200d'},verdict:'bull'},
+  {ticker:'GOOGL',name:'Alphabet Inc',type:'STOCK',signal:'BUY',label:'12.1% pullback from ATH',detail:'Antitrust noise creating buying opportunity. Core ad business intact.',metrics:{rsi:'38.1',drawdown:'12.1%',sma:'Below 200d'},verdict:'bull'},
+  {ticker:'META',name:'Meta Platforms',type:'STOCK',signal:'BUY',label:'10.8% drawdown — add zone',detail:'AI investment cycle intact. 1B+ AI users. Monetisation clear.',metrics:{rsi:'41.2',drawdown:'10.8%',sma:'Near 200d'},verdict:'bull'},
+  {ticker:'AMZN',name:'Amazon',type:'STOCK',signal:'BUY',label:'9.4% pullback + AWS growth',detail:'Cloud re-acceleration. Ads business a hidden gem. Good entry.',metrics:{rsi:'42.5',drawdown:'9.4%',sma:'Near 200d'},verdict:'bull'},
+  {ticker:'QQQ',name:'Invesco NASDAQ 100',type:'ETF',signal:'BUY',label:'7.2% below 52-week high',detail:'Broad tech exposure dip. Solid DCA opportunity across 100 companies.',metrics:{rsi:'39.8',drawdown:'7.2%',sma:'Near 200d'},verdict:'bull'},
+  {ticker:'MSFT',name:'Microsoft Corp',type:'STOCK',signal:'WATCH',label:'5.3% weekly dip',detail:'Approaching add zone. Azure + Copilot growth strong. Monitor.',metrics:{rsi:'48.2',drawdown:'5.3%',sma:'Above 200d'},verdict:'bull'},
+  {ticker:'AAPL',name:'Apple Inc',type:'STOCK',signal:'WATCH',label:'Golden cross forming',detail:'50d MA crossing 200d MA upward. Bullish momentum signal in 2-3 weeks.',metrics:{rsi:'52.1',drawdown:'4.1%',sma:'Above 200d'},verdict:'neutral'},
+  {ticker:'TSLA',name:'Tesla Inc',type:'STOCK',signal:'WATCH',label:'High volatility caution',detail:'RSI 44, beta >2. Treat as speculative. Keep position small max 5%.',metrics:{rsi:'44.0',drawdown:'28.3%',sma:'Below 200d'},verdict:'bear'},
+  {ticker:'VOO',name:'Vanguard S&P 500',type:'ETF',signal:'HOLD',label:'Within 3% of ATH',detail:'No lump sum. DCA only on scheduled dates. Core long-term hold.',metrics:{rsi:'58.4',drawdown:'2.8%',sma:'Above 200d'},verdict:'bull'},
+  {ticker:'NFLX',name:'Netflix Inc',type:'STOCK',signal:'HOLD',label:'Near ATH — priced in',detail:'Subscriber growth strong but valuation reflects it. DCA only.',metrics:{rsi:'61.2',drawdown:'3.1%',sma:'Above 200d'},verdict:'neutral'},
+  {ticker:'VUG',name:'Vanguard Growth ETF',type:'ETF',signal:'HOLD',label:'Tracking closely with S&P',detail:'Good growth ETF. Add during dips. Currently fairly valued.',metrics:{rsi:'55.0',drawdown:'3.5%',sma:'Above 200d'},verdict:'bull'},
+  {ticker:'SCHD',name:'Schwab Dividend ETF',type:'ETF',signal:'WATCH',label:'New — income layer',detail:'3.5% dividend yield. Adds income to growth-heavy portfolio. Consider 10-15% allocation.',metrics:{rsi:'50.2',drawdown:'6.1%',sma:'Near 200d'},verdict:'bull'},
+];
+
+const ANALYSIS = [
+  {
+    ticker:'NVDA',name:'NVIDIA Corp',verdict:'bullish',
+    pe:'35x',debt:'Low (0.3)',roe:'85%',revenue:'+78% YoY',
+    technical:'Price broke below 200-day moving average — historically a strong buying zone. RSI at 27 means the stock is technically oversold, like a spring compressed too far. It tends to bounce back.',
+    fundamental:'NVIDIA dominates AI chip market with 70%+ share. Data center revenue growing at 78% year-on-year. Margins are exceptional. The company is essentially printing money from the AI boom.',
+    news:'Recent dip driven by export restriction concerns to China, not fundamentals. This is noise, not a business problem. Institutions are buying the dip.',
+    risk:'Main risk: if AI spending slows or a competitor catches up (AMD, Intel). Also geopolitical risk from US-China trade tensions affecting chip exports.',
+    action:'Strong buy zone. Consider deploying 50% of planned allocation now, remaining 50% if it drops further. Do not wait for the "perfect" bottom.',
+    metrics:[
+      {label:'P/E Ratio',value:'35x',note:'Fair for growth rate',cls:'good'},
+      {label:'Revenue growth',value:'+78%',note:'Exceptional',cls:'good'},
+      {label:'Debt level',value:'Low',note:'0.3x debt/equity',cls:'good'},
+      {label:'RSI',value:'27.4',note:'Oversold (<30 = buy)',cls:'good'},
+      {label:'Drawdown',value:'18.2%',note:'Off all-time high',cls:'warn'},
+      {label:'Profit margin',value:'55%',note:'Industry leading',cls:'good'},
+    ]
+  },
+  {
+    ticker:'MSFT',name:'Microsoft Corp',verdict:'bullish',
+    pe:'32x',debt:'Low (0.4)',roe:'43%',revenue:'+17% YoY',
+    technical:'Trading above 200-day moving average — still in uptrend. RSI at 48 is neutral, not overbought. A 5% weekly dip is a mild pullback in an otherwise strong trend.',
+    fundamental:'Azure cloud growing 31%. Copilot AI integration across all products creates upsell opportunity. Office 365 + LinkedIn + GitHub = diversified moat. One of the safest large-cap tech stocks.',
+    news:'Beat last earnings estimates. Copilot business customers growing 50% quarter-on-quarter. No major negative catalysts.',
+    risk:'Regulatory scrutiny on AI and cloud dominance. Activision integration still ongoing. At 32x PE, not cheap — requires continued execution.',
+    action:'Not a screaming buy right now but a solid DCA candidate. Add monthly regardless of price. If it drops to -10% from ATH, increase allocation.',
+    metrics:[
+      {label:'P/E Ratio',value:'32x',note:'Slightly elevated',cls:'warn'},
+      {label:'Revenue growth',value:'+17%',note:'Steady and reliable',cls:'good'},
+      {label:'Debt level',value:'Low',note:'0.4x debt/equity',cls:'good'},
+      {label:'RSI',value:'48.2',note:'Neutral zone',cls:'warn'},
+      {label:'Drawdown',value:'5.3%',note:'Minor pullback',cls:'good'},
+      {label:'Profit margin',value:'36%',note:'Very strong',cls:'good'},
+    ]
+  },
+  {
+    ticker:'GOOGL',name:'Alphabet Inc',verdict:'bullish',
+    pe:'22x',debt:'Net cash',roe:'31%',revenue:'+12% YoY',
+    technical:'12% off all-time high. RSI at 38 approaching oversold. Price sitting near 200-day moving average — a key test. If it holds, strong base for recovery.',
+    fundamental:'Search still 57% of revenue, growing. YouTube ad revenue accelerating. Google Cloud growing 28%. Cheapest of the mega-cap tech stocks at 22x earnings.',
+    news:'Antitrust ruling creating fear and uncertainty. However, remedies are unlikely to be severe enough to break the business. Market is overreacting to legal noise.',
+    risk:'Antitrust breakup risk (low probability but high impact). AI search disruption from ChatGPT/Perplexity. These are real but long-term risks.',
+    action:'Best value in FAANG right now. 22x PE with 12% revenue growth and net cash on balance sheet. Buy the antitrust dip — this is fear-driven, not fundamental.',
+    metrics:[
+      {label:'P/E Ratio',value:'22x',note:'Cheap for quality',cls:'good'},
+      {label:'Revenue growth',value:'+12%',note:'Solid',cls:'good'},
+      {label:'Debt level',value:'Net cash',note:'No debt',cls:'good'},
+      {label:'RSI',value:'38.1',note:'Approaching oversold',cls:'good'},
+      {label:'Drawdown',value:'12.1%',note:'Good entry zone',cls:'good'},
+      {label:'Profit margin',value:'28%',note:'Strong',cls:'good'},
+    ]
+  },
+  {
+    ticker:'TSLA',name:'Tesla Inc',verdict:'bearish',
+    pe:'92x',debt:'Medium (0.7)',roe:'14%',revenue:'-9% YoY',
+    technical:'28% off ATH. RSI 44 — not yet oversold. Below 200-day moving average. No clear technical bottom established yet. Could fall further.',
+    fundamental:'Vehicle deliveries declining for third consecutive quarter. Facing intense competition from BYD in China (largest EV market). Energy business growing but too small to offset auto weakness.',
+    news:'Elon Musk political controversy affecting brand. US consumer sentiment toward Tesla declining. Q1 deliveries missed estimates significantly.',
+    risk:'Very high. Revenue declining, competition intensifying, CEO distraction, premium valuation (92x PE) despite falling sales. This is a speculative position not a retirement anchor.',
+    action:'Not recommended as a core retirement holding. If you want exposure, keep it under 3% of portfolio. Better risk-adjusted returns available in VOO, NVDA, GOOGL.',
+    metrics:[
+      {label:'P/E Ratio',value:'92x',note:'Very expensive',cls:'bad'},
+      {label:'Revenue growth',value:'-9%',note:'Declining',cls:'bad'},
+      {label:'Debt level',value:'Medium',note:'0.7x debt/equity',cls:'warn'},
+      {label:'RSI',value:'44.0',note:'Neutral',cls:'warn'},
+      {label:'Drawdown',value:'28.3%',note:'Significant drop',cls:'warn'},
+      {label:'Profit margin',value:'5%',note:'Compressed',cls:'bad'},
+    ]
+  },
+  {
+    ticker:'AAPL',name:'Apple Inc',verdict:'neutral',
+    pe:'28x',debt:'Net cash',roe:'150%+',revenue:'+5% YoY',
+    technical:'Golden cross forming — 50-day MA approaching 200-day MA from below. When this completes it is historically a bullish signal. Currently 4% off ATH.',
+    fundamental:'iPhone still dominant. Services business (App Store, iCloud, Apple Pay) growing 14% and high margin. India expansion reducing China risk. Share buybacks return massive value to shareholders.',
+    news:'India manufacturing expansion progressing. No major negative catalysts. Apple Intelligence AI features driving upgrade cycle anticipation.',
+    risk:'China revenue (18% of total) at geopolitical risk. Antitrust pressure on App Store fees. Growth is slow at 5% — you are paying 28x for stability not explosive growth.',
+    action:'Solid defensive position. Not a high-conviction buy right now — wait for golden cross to complete or a 10%+ dip. Good for capital preservation within a growth portfolio.',
+    metrics:[
+      {label:'P/E Ratio',value:'28x',note:'Fair value',cls:'warn'},
+      {label:'Revenue growth',value:'+5%',note:'Slow but stable',cls:'warn'},
+      {label:'Debt level',value:'Net cash',note:'Fortress balance sheet',cls:'good'},
+      {label:'RSI',value:'52.1',note:'Neutral',cls:'warn'},
+      {label:'Drawdown',value:'4.1%',note:'Near ATH',cls:'warn'},
+      {label:'Profit margin',value:'26%',note:'Strong',cls:'good'},
+    ]
+  },
+  {
+    ticker:'META',name:'Meta Platforms',verdict:'bullish',
+    pe:'26x',debt:'Net cash',roe:'38%',revenue:'+21% YoY',
+    technical:'10.8% off ATH. RSI 41 approaching oversold. Near 200-day moving average support. This level has been a strong bounce zone historically.',
+    fundamental:'AI assistant at 1B+ users faster than any product in history. Ad revenue growing 21% despite macro headwinds. Reality Labs losses stabilising. 26x PE is reasonable for 21% growth.',
+    news:'Meta AI adoption metrics far exceeding expectations. Advertisers reporting strong ROI. Instagram Reels now a meaningful revenue contributor.',
+    risk:'Heavy AI capex spending ($60B+ in 2025) before clear monetisation. Regulatory risk in EU. Dependency on advertiser spending which is cyclical.',
+    action:'Buy the dip. 10.8% pullback with RSI near oversold on a company growing revenue 21% at 26x PE. Add to position. This is a high-quality dip.',
+    metrics:[
+      {label:'P/E Ratio',value:'26x',note:'Fair for growth',cls:'good'},
+      {label:'Revenue growth',value:'+21%',note:'Strong',cls:'good'},
+      {label:'Debt level',value:'Net cash',note:'No debt',cls:'good'},
+      {label:'RSI',value:'41.2',note:'Approaching oversold',cls:'good'},
+      {label:'Drawdown',value:'10.8%',note:'Buy zone',cls:'good'},
+      {label:'Profit margin',value:'33%',note:'Expanding',cls:'good'},
+    ]
+  },
+];
+
+const NEWS = [
+  {ticker:'NVDA',title:'NVIDIA data center revenue hits record as hyperscalers accelerate AI infrastructure build-out',meta:'Reuters · 2h ago',sentiment:'positive'},
+  {ticker:'MSFT',title:'Microsoft Azure growth beats estimates; Copilot enterprise adoption cited as key driver',meta:'Bloomberg · 4h ago',sentiment:'positive'},
+  {ticker:'GOOGL',title:'Alphabet antitrust ruling: analysts split — most see limited structural impact to ad revenue',meta:'WSJ · 5h ago',sentiment:'neutral'},
+  {ticker:'META',title:'Meta AI assistant surpasses 1 billion monthly users — fastest product adoption in company history',meta:'CNBC · 6h ago',sentiment:'positive'},
+  {ticker:'AAPL',title:'Apple India manufacturing expansion on track — reduces China supply chain concentration',meta:'FT · 8h ago',sentiment:'positive'},
+  {ticker:'TSLA',title:'Tesla Q1 deliveries miss estimates for third consecutive quarter; BYD widens China lead',meta:'Reuters · 9h ago',sentiment:'negative'},
+  {ticker:'AMZN',title:'AWS signs $10B sovereign AI infrastructure deal; cloud backlog at record $189B',meta:'Bloomberg · 11h ago',sentiment:'positive'},
+  {ticker:'NFLX',title:'Netflix raises ad-tier prices; subscriber growth ahead of estimates in Asia-Pacific',meta:'Variety · 14h ago',sentiment:'positive'},
+  {ticker:'VOO',title:'S&P 500 forward P/E at 21x — elevated but supported by earnings growth revisions',meta:'Morningstar · 1d ago',sentiment:'neutral'},
+  {ticker:'FED',title:'Fed minutes: "patient" approach to cuts — inflation needs to be sustainably at 2% before easing',meta:'AP · 1d ago',sentiment:'neutral'},
+  {ticker:'QQQ',title:'Nasdaq 100 components report strongest earnings season since 2021 — tech outperforming',meta:'MarketWatch · 1d ago',sentiment:'positive'},
+  {ticker:'SCHD',title:'Dividend stocks attracting rotation as investors seek income in high-rate environment',meta:'Barrons · 2d ago',sentiment:'positive'},
+];
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+
+function badgeClass(s){return s==='BUY'?'badge-buy':s==='WATCH'?'badge-watch':'badge-hold'}
+function verdictBadge(v){return v==='bull'?'badge-bull':v==='neutral'?'badge-neutral':'badge-bear'}
+function verdictLabel(v){return v==='bull'?'BULLISH':v==='neutral'?'NEUTRAL':'BEARISH'}
+function verdictColor(v){return v==='bull'?'var(--green)':v==='neutral'?'var(--amber)':'var(--red)'}
+
+let sigFilter='all', anaFilter='all';
+
+function renderSignals(){
+  let data = SIGNALS;
+  if(sigFilter==='buy') data=data.filter(s=>s.signal==='BUY');
+  else if(sigFilter==='etf') data=data.filter(s=>s.type==='ETF');
+  else if(sigFilter==='stock') data=data.filter(s=>s.type==='STOCK');
+  const grid=document.getElementById('sig-grid');
+  grid.innerHTML=data.map(s=>`
+    <div class="sig-card" onclick="openSignalDetail('${s.ticker}')">
+      <div class="sig-top">
+        <div>
+          <div class="sig-ticker ${s.signal==='BUY'?'g':s.signal==='WATCH'?'a':''}">${s.ticker}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">${s.name}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+          <span class="sig-badge ${badgeClass(s.signal)}">${s.signal}</span>
+          <span class="sig-badge ${verdictBadge(s.verdict)}">${verdictLabel(s.verdict)}</span>
+        </div>
+      </div>
+      <div class="sig-label">${s.label}</div>
+      <div class="sig-detail">${s.detail}</div>
+      <div class="sig-metrics">
+        <div class="sig-metric"><div class="ml">RSI</div><div class="mv ${parseFloat(s.metrics.rsi)<30?'g':parseFloat(s.metrics.rsi)>70?'r':'a'}">${s.metrics.rsi}</div></div>
+        <div class="sig-metric"><div class="ml">Drawdown</div><div class="mv a">${s.metrics.drawdown}</div></div>
+        <div class="sig-metric"><div class="ml">vs 200d MA</div><div class="mv" style="font-size:11px;color:var(--text2)">${s.metrics.sma}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-family:var(--mono)">Tap for full analysis →</div>
+    </div>`).join('');
 }
-setInterval(tick,1000);tick();
 
-// Count buy signals
-const buys=document.querySelectorAll('.sig-buy,.sig-max,.sig-critical,.sig-add').length;
-document.getElementById('sig-count').textContent=buys;
+function renderAnalysis(){
+  let data=ANALYSIS;
+  if(anaFilter==='bullish') data=data.filter(a=>a.verdict==='bullish');
+  else if(anaFilter==='neutral') data=data.filter(a=>a.verdict==='neutral');
+  else if(anaFilter==='bearish') data=data.filter(a=>a.verdict==='bearish');
+  const grid=document.getElementById('analysis-grid');
+  grid.innerHTML=data.map(a=>`
+    <div class="sig-card" onclick="openAnalysis('${a.ticker}')">
+      <div class="sig-top">
+        <div>
+          <div class="sig-ticker">${a.ticker}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">${a.name}</div>
+        </div>
+        <span class="sig-badge ${a.verdict==='bullish'?'badge-bull':a.verdict==='neutral'?'badge-neutral':'badge-bear'}">${a.verdict.toUpperCase()}</span>
+      </div>
+      <div class="sig-metrics" style="margin-top:0;padding-top:0;border-top:none;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono)">P/E Ratio</div><div style="font-family:var(--mono);font-size:14px;font-weight:500;color:${parseFloat(a.pe)>50?'var(--red)':parseFloat(a.pe)>30?'var(--amber)':'var(--green)'}">${a.pe}</div></div>
+        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono)">Debt</div><div style="font-family:var(--mono);font-size:14px;font-weight:500;color:var(--green)">${a.debt}</div></div>
+        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono)">Revenue growth</div><div style="font-family:var(--mono);font-size:14px;font-weight:500;color:${a.revenue.startsWith('-')?'var(--red)':'var(--green)'}">${a.revenue}</div></div>
+        <div><div style="font-size:10px;color:var(--muted);font-family:var(--mono)">ROE</div><div style="font-family:var(--mono);font-size:14px;font-weight:500;color:var(--green)">${a.roe}</div></div>
+      </div>
+      <div class="verdict-bar" style="background:${a.verdict==='bullish'?'#0a2014':a.verdict==='neutral'?'#1e1e08':'#200a0a'}">
+        <span class="verdict-text" style="color:${verdictColor(a.verdict==='bullish'?'bull':a.verdict==='neutral'?'neutral':'bear')}">${a.verdict==='bullish'?'✓ Buy candidate':a.verdict==='neutral'?'→ Hold / DCA':'✗ Avoid for retirement'}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-family:var(--mono)">Tap for full breakdown →</div>
+    </div>`).join('');
+}
 
-// Compound calc
+function renderNews(){
+  const feed=document.getElementById('news-feed');
+  feed.innerHTML=NEWS.map(n=>`
+    <div class="news-item">
+      <span class="news-ticker-badge">${n.ticker}</span>
+      <div>
+        <div class="news-title">${n.title}</div>
+        <div class="news-meta">${n.meta}</div>
+      </div>
+      <span class="news-sentiment ${n.sentiment==='positive'?'sent-pos':n.sentiment==='negative'?'sent-neg':'sent-neu'}">${n.sentiment}</span>
+    </div>`).join('');
+}
+
+// ─── MODALS ──────────────────────────────────────────────────────────────────
+
+function openSignalDetail(ticker){
+  const ana=ANALYSIS.find(a=>a.ticker===ticker);
+  if(ana){openAnalysis(ticker);return;}
+  const sig=SIGNALS.find(s=>s.ticker===ticker);
+  if(!sig)return;
+  const vclass=sig.verdict==='bull'?'verdict-bull':sig.verdict==='neutral'?'verdict-neutral':'verdict-bear';
+  document.getElementById('modal-body').innerHTML=`
+    <div class="modal-hdr">
+      <div><div class="modal-ticker">${sig.ticker}</div><div class="modal-name">${sig.name} · ${sig.type}</div></div>
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    </div>
+    <div class="section-title">Signal summary</div>
+    <div class="verdict-full ${vclass}" style="margin-bottom:16px">
+      <div class="vt" style="color:${verdictColor(sig.verdict)}">${sig.label}</div>
+      <div class="vd">${sig.detail}</div>
+    </div>
+    <div class="section-title">Key metrics</div>
+    <div class="metrics-grid">
+      <div class="metric-box"><div class="ml">RSI</div><div class="mv ${parseFloat(sig.metrics.rsi)<30?'g':'a'}">${sig.metrics.rsi}</div><div class="md">${parseFloat(sig.metrics.rsi)<30?'Oversold — buy signal':'Neutral range'}</div></div>
+      <div class="metric-box"><div class="ml">Drawdown</div><div class="mv a">${sig.metrics.drawdown}</div><div class="md">Off all-time high</div></div>
+      <div class="metric-box"><div class="ml">200-day MA</div><div class="mv" style="font-size:14px;color:var(--text2)">${sig.metrics.sma}</div><div class="md">Moving average position</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6">Full fundamental analysis not available for this ticker yet. Check the Stock Analysis tab for detailed breakdowns on NVDA, MSFT, GOOGL, META, TSLA and AAPL.</p>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function openAnalysis(ticker){
+  const a=ANALYSIS.find(x=>x.ticker===ticker);
+  if(!a)return;
+  const vclass=a.verdict==='bullish'?'verdict-bull':a.verdict==='neutral'?'verdict-neutral':'verdict-bear';
+  const vcolor=verdictColor(a.verdict==='bullish'?'bull':a.verdict==='neutral'?'neutral':'bear');
+  document.getElementById('modal-body').innerHTML=`
+    <div class="modal-hdr">
+      <div><div class="modal-ticker">${a.ticker}</div><div class="modal-name">${a.name}</div></div>
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    </div>
+    <div class="verdict-full ${vclass}">
+      <div class="vt" style="color:${vcolor};font-size:16px">${a.verdict.toUpperCase()} — ${a.verdict==='bullish'?'Buy candidate':a.verdict==='neutral'?'Hold / DCA only':'Avoid for retirement core'}</div>
+      <div class="vd" style="margin-top:6px">${a.action}</div>
+    </div>
+    <div class="section-title" style="margin-top:16px">Technical picture — what the chart is telling us</div>
+    <div class="analysis-block"><p>${a.technical}</p></div>
+    <div class="section-title">Fundamental picture — is the business healthy?</div>
+    <div class="analysis-block"><p>${a.fundamental}</p></div>
+    <div class="section-title">Recent news impact</div>
+    <div class="analysis-block"><p>${a.news}</p></div>
+    <div class="section-title">Key risks — what could go wrong</div>
+    <div class="analysis-block"><p style="color:var(--red)">${a.risk}</p></div>
+    <div class="section-title">Key metrics at a glance</div>
+    <table class="key-metrics-table">
+      <thead><tr><th>Metric</th><th>Value</th><th>What it means</th><th>Rating</th></tr></thead>
+      <tbody>${a.metrics.map(m=>`<tr><td>${m.label}</td><td class="${m.cls}" style="font-family:var(--mono)">${m.value}</td><td style="color:var(--text2)">${m.note}</td><td class="${m.cls}">${m.cls==='good'?'✓ Good':m.cls==='warn'?'~ Caution':'✗ Concern'}</td></tr>`).join('')}</tbody>
+    </table>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e){if(e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('open')}
+function closeModalBtn(){document.getElementById('modal').classList.remove('open')}
+
+// ─── UI CONTROLS ─────────────────────────────────────────────────────────────
+
+function showTab(t){
+  document.querySelectorAll('.tab').forEach((b,i)=>{b.classList.toggle('active',['signals','analysis','news','calc'][i]===t)});
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+}
+
+function filterSig(f,btn){
+  sigFilter=f;
+  document.querySelectorAll('#panel-signals .fbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');renderSignals();
+}
+
+function filterAnalysis(f,btn){
+  anaFilter=f;
+  document.querySelectorAll('#panel-analysis .fbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');renderAnalysis();
+}
+
 function fmt(n){
   if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';
-  if(n>=1000)return'$'+(n/1000).toFixed(0)+'K';
-  return'$'+Math.round(n).toLocaleString()
+  if(n>=1000)return'$'+Math.round(n/1000)+'K';
+  return'$'+Math.round(n).toLocaleString();
 }
+
 function calc(){
-  const age=+document.getElementById('r-age').value;
-  const P=+document.getElementById('r-port').value;
-  const c=+document.getElementById('r-contrib').value;
-  const r=+document.getElementById('r-rate').value/100;
+  const age=+document.getElementById('ra').value;
+  const P=+document.getElementById('rp').value;
+  const c=+document.getElementById('rc').value;
+  const r=+document.getElementById('rr').value/100;
   const yrs=Math.max(0,50-age);
   const mr=r/12,n=yrs*12;
   const fv=P*Math.pow(1+r,yrs)+c*(Math.pow(1+mr,n)-1)/mr;
@@ -435,29 +582,32 @@ function calc(){
   const pct=Math.min(100,Math.round(fv/target*100));
   const fvP=P*Math.pow(1+r,yrs);
   const need=Math.max(0,(target-fvP)*mr/(Math.pow(1+mr,n)-1));
-
-  document.getElementById('v-age').textContent=age;
-  document.getElementById('v-port').textContent=fmt(P);
-  document.getElementById('v-contrib').textContent=fmt(c)+'/mo';
-  document.getElementById('v-rate').textContent=(+document.getElementById('r-rate').value).toFixed(1)+'%';
-
-  const projEl=document.getElementById('r-proj');
-  projEl.textContent=fmt(fv);
-  projEl.style.color=fv>=target?'var(--green)':'var(--amber)';
-
-  document.getElementById('r-need').textContent=need>0?fmt(need)+'/mo':'✓ On track';
-  document.getElementById('r-years').textContent=yrs+' years';
-
-  const statusEl=document.getElementById('r-status');
-  statusEl.textContent=fv>=target?'✅ On track':'⚠ Need more';
-  statusEl.style.color=fv>=target?'var(--green)':'var(--amber)';
-
+  document.getElementById('vp').textContent=fmt(P);
+  document.getElementById('vc').textContent=fmt(c)+'/mo';
+  document.getElementById('vr').textContent=(+document.getElementById('rr').value).toFixed(1)+'%';
+  document.getElementById('va').textContent=age;
+  const proj=document.getElementById('r-proj');
+  proj.textContent=fmt(fv);proj.style.color=fv>=target?'var(--green)':'var(--amber)';
+  document.getElementById('r-need').textContent=need>0?fmt(need)+'/mo':'On track ✓';
+  document.getElementById('r-yrs').textContent=yrs+' years';
+  const st=document.getElementById('r-stat');
+  st.textContent=fv>=target?'On track ✓':'Increase contributions';
+  st.style.color=fv>=target?'var(--green)':'var(--amber)';
+  document.getElementById('cprog').style.width=pct+'%';
+  document.getElementById('cpct').textContent=pct+'%';
   document.getElementById('prog-fill').style.width=pct+'%';
   document.getElementById('prog-pct').textContent=pct+'%';
   document.getElementById('banner-proj').textContent=fmt(fv);
   document.getElementById('banner-proj').style.color=fv>=target?'var(--green)':'var(--amber)';
 }
-calc();
+
+function tick(){
+  const t=new Date(Date.now()+8*3600000);
+  document.getElementById('clock').textContent='SGT '+t.toISOString().substr(11,8);
+}
+
+renderSignals();renderAnalysis();renderNews();calc();
+setInterval(tick,1000);tick();
 </script>
 </body>
 </html>
