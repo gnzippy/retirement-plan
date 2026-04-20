@@ -1,16 +1,15 @@
 name: Stock Signal Bot
-
 on:
   schedule:
     - cron: '0 13-20 * * 1-5'
     - cron: '0 22,23 * * 1-5'
   workflow_dispatch:
-
 jobs:
   run-signal-bot:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,14 +28,16 @@ jobs:
           TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
           ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
         run: python bot_single_run.py
-- name: Save signals to dashboard
+
+      - name: Save signals to dashboard
         run: |
+          mkdir -p docs
           cp signal_log.json docs/signals.json
-      
+
       - name: Commit signals
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add docs/signals.json
-          git commit -m "Update signals" || echo "No changes"
+          git commit -m "Update signals [skip ci]" || echo "No changes to commit"
           git push
