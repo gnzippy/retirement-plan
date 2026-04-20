@@ -1,4 +1,13 @@
 {
-  "timestamp": "2026-04-20 12:36 SGT",
-  "signals": []
+  "timestamp": "2026-04-20 13:22 SGT",
+  "signals": [],
+  "watchlist": [],
+  "summary": {
+    "total_tickers": 0,
+    "buy_signals": 0,
+    "zone4_count": 0,
+    "zone3_count": 0,
+    "zone2_count": 0,
+    "zone1_count": 0
+  }
 }
