@@ -15,25 +15,41 @@
   --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--serif:'Fraunces',serif;
 }
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 50% 40% at 15% 5%,#0d3d2808,transparent 60%),radial-gradient(ellipse 40% 50% at 85% 95%,#0a2e2006,transparent 60%);pointer-events:none;z-index:0}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 50% 40% at 15% 5%,#0d3d2808,transparent 60%);pointer-events:none;z-index:0}
 .wrap{max-width:1200px;margin:0 auto;padding:20px;position:relative;z-index:1}
 
-/* HEADER — no financial info, public safe */
+/* HEADER */
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
 .logo h1{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--green)}
 .logo p{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px;letter-spacing:.1em;text-transform:uppercase}
-.hdr-right{display:flex;align-items:center;gap:12px}
+.hdr-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+.live-dot.loading{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+.live-dot.error{background:var(--red);box-shadow:0 0 6px var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 #clock{font-family:var(--mono);font-size:11px;color:var(--muted)}
+#api-status{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:100px;border:1px solid var(--border);color:var(--muted)}
+#refresh-btn{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:100px;border:1px solid var(--green2);color:var(--green);background:transparent;cursor:pointer}
+#refresh-btn:hover{background:var(--green2);color:#000}
 
-/* SUMMARY BAR — public safe, no $ amounts */
-.summary-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+/* API ERROR BANNER */
+.api-banner{display:none;background:#1a0808;border:1px solid #7a2020;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#e07070;line-height:1.6}
+.api-banner.show{display:block}
+
+/* LOADING OVERLAY */
+.loading-bar{height:3px;background:var(--s2);border-radius:3px;margin-bottom:16px;overflow:hidden;display:none}
+.loading-bar.show{display:block}
+.loading-progress{height:3px;background:linear-gradient(90deg,var(--green2),var(--green));border-radius:3px;width:0%;transition:width .3s}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
 .kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
 .kpi .kl{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;font-family:var(--mono)}
 .kpi .kv{font-family:var(--mono);font-size:18px;font-weight:500;margin-bottom:2px}
 .kpi .ks{font-size:10px;color:var(--muted)}
 .g{color:var(--green)}.a{color:var(--amber)}.r{color:var(--red)}.b{color:var(--blue)}
+.skeleton{background:var(--s2);border-radius:4px;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%,100%{opacity:.4}50%{opacity:.8}}
 
 /* TABS */
 .tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:4px}
@@ -41,20 +57,21 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .tab.active{background:var(--s2);color:var(--green);border:1px solid var(--border)}
 .panel{display:none}.panel.active{display:block}
 
-/* FILTER BAR */
+/* FILTER */
 .filter-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .fbtn{font-size:11px;padding:4px 12px;border-radius:100px;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--muted);font-family:var(--mono);transition:all .15s}
 .fbtn.on{background:var(--green2);color:#fff;border-color:var(--green2)}
 
 /* SIGNAL CARDS */
 .card-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.sig-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .2s}
+.sig-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color .2s;position:relative}
 .sig-card:hover{border-color:var(--green2)}
+.sig-card.loading-card{opacity:.6;pointer-events:none}
 .sig-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .sig-ticker{font-family:var(--mono);font-size:17px;font-weight:500}
 .badges{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
 .badge{font-size:10px;padding:2px 8px;border-radius:100px;font-family:var(--mono);font-weight:500;letter-spacing:.05em;white-space:nowrap}
-.b-lt{background:#0a1e30;color:#5b9cf6;border:1px solid #1e3d60}
+.b-lt{background:#0a1e30;color:var(--blue);border:1px solid #1e3d60}
 .b-dca1{background:#07120e;color:var(--green);border:1px solid var(--green2)}
 .b-dca2{background:#0d1a0a;color:#6fcf50;border:1px solid #2a5020}
 .b-dca3{background:#1a1a06;color:var(--amber);border:1px solid #5a5010}
@@ -73,8 +90,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .sm-box .ml{font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em}
 .sm-box .mv{font-size:12px;font-weight:500;font-family:var(--mono);margin-top:2px}
 .tap-hint{font-size:10px;color:var(--muted);margin-top:8px;font-family:var(--mono)}
+.last-updated{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:6px;text-align:right}
 
-/* DCA STRATEGY */
+/* DCA */
 .dca-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .dca-card{border-radius:12px;padding:14px 16px;border:1px solid}
 .dca-z1{background:#07120e;border-color:#1a4030}.dca-z2{background:#0d1a0a;border-color:#2a5020}
@@ -82,24 +100,20 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .dca-title{font-size:11px;font-weight:500;margin-bottom:8px;font-family:var(--mono);letter-spacing:.06em}
 .dca-rule{display:flex;align-items:baseline;gap:6px;font-size:11px;color:var(--text2);margin-bottom:4px}
 .dca-rule .tag{font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:3px;background:var(--s2);color:var(--text2);white-space:nowrap}
-.rsi-explain{background:#0a1a14;border:1px solid #1a4030;border-radius:10px;padding:14px;font-size:12px;line-height:1.8;color:var(--text2)}
 
 /* NEWS */
 .news-item{padding:14px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start}
 .news-item:last-child{border:none}
 .news-lbadge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:5px;background:var(--s2);color:var(--muted);border:1px solid var(--border);white-space:nowrap;margin-top:2px}
 .news-title{font-size:13px;color:var(--text);line-height:1.5;margin-bottom:4px}
-.news-meta{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.news-src{font-size:11px;color:var(--muted);font-family:var(--mono)}
 .news-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .freshness{font-size:10px;padding:2px 8px;border-radius:100px;font-family:var(--mono);white-space:nowrap}
 .fresh-now{background:#0a2014;color:var(--green);border:1px solid var(--green2)}
 .fresh-ok{background:#1e1a06;color:var(--amber);border:1px solid #6b4a10}
 .fresh-old{background:#200a0a;color:var(--red);border:1px solid #5a1010}
-.sent-pos{font-size:10px;color:var(--green);font-family:var(--mono)}
-.sent-neg{font-size:10px;color:var(--red);font-family:var(--mono)}
-.sent-neu{font-size:10px;color:var(--muted);font-family:var(--mono)}
 
-/* CALC TAB — progress tracker lives here */
+/* CALC */
 .prog-section{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:16px}
 .prog-section h2{font-family:var(--serif);font-size:18px;font-weight:300;color:var(--green);margin-bottom:4px}
 .prog-section p{font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:14px}
@@ -127,6 +141,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
 .modal-ticker{font-family:var(--serif);font-size:30px;font-weight:300;color:var(--green)}
 .modal-name{font-size:12px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+.modal-price{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--text);margin-top:4px}
 .modal-close{background:var(--s2);border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sec-title{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-top:18px}
 .metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
@@ -140,18 +155,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 .vbox-bull{background:#07120e;border-color:var(--green2)}.vbox-neutral{background:#1e1e08;border-color:#6b5a1a}.vbox-bear{background:#200a0a;border-color:#7a2020}
 .vbox-title{font-size:14px;font-weight:500;margin-bottom:6px}
 .vbox-text{font-size:12px;color:var(--text2);line-height:1.6}
-.analysis-p{font-size:13px;color:var(--text);line-height:1.7;margin-bottom:4px}
-.analysis-risk{font-size:13px;color:#e07070;line-height:1.7}
-.pe-benchmark{background:var(--s2);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12px;line-height:1.7;color:var(--text2);border:1px solid var(--border)}
-.pe-benchmark strong{color:var(--text);font-weight:500}
 .kmt{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
 .kmt th{text-align:left;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:6px 0;border-bottom:1px solid var(--border);font-weight:400}
 .kmt td{padding:8px 0;border-bottom:1px solid var(--border);color:var(--text)}
 .kmt tr:last-child td{border:none}
 .kmt .good{color:var(--green)}.kmt .warn{color:var(--amber)}.kmt .bad{color:var(--red)}
+.pe-box{background:var(--s2);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12px;line-height:1.7;color:var(--text2);border:1px solid var(--border)}
+.pe-box strong{color:var(--text);font-weight:500}
+.live-badge{font-size:10px;padding:2px 8px;border-radius:100px;background:#0a2218;color:var(--green);border:1px solid var(--green2);font-family:var(--mono)}
 
 @media(max-width:700px){
-  .card-grid{grid-template-columns:1fr}.summary-bar{grid-template-columns:repeat(3,1fr)}
+  .card-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}
   .metrics-grid{grid-template-columns:1fr 1fr}.dca-grid{grid-template-columns:1fr}
   .sig-metrics{grid-template-columns:repeat(2,1fr)}.result-grid{grid-template-columns:1fr 1fr}
 }
@@ -160,25 +174,37 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 <body>
 <div class="wrap">
 
-<!-- HEADER — no $ amounts, public safe -->
 <div class="header">
   <div class="logo">
     <h1>Retirement Alpha Desk</h1>
-    <p>FAANG + ETF Signal Intelligence · RSI-14 · SGT</p>
+    <p>Live data · Finnhub · RSI-14 · SGT</p>
   </div>
-  <div class="hdr-right"><div class="live-dot"></div><span id="clock">--:--:--</span></div>
+  <div class="hdr-right">
+    <div class="live-dot loading" id="live-dot"></div>
+    <span id="api-status">Loading...</span>
+    <button id="refresh-btn" onclick="loadAllData()">Refresh</button>
+    <span id="clock">--:--:--</span>
+  </div>
 </div>
 
-<!-- SUMMARY — no personal $ data -->
-<div class="summary-bar">
+<!-- API ERROR BANNER -->
+<div class="api-banner" id="api-banner">
+  ⚠️ <strong>API Issue Detected:</strong> <span id="api-error-msg"></span><br>
+  This usually means the API key has hit its rate limit (60 calls/min) or someone else is using it. Wait 1 minute then click Refresh. If this keeps happening, regenerate your key at <strong>finnhub.io/dashboard</strong>.
+</div>
+
+<!-- LOADING BAR -->
+<div class="loading-bar" id="loading-bar"><div class="loading-progress" id="loading-progress"></div></div>
+
+<!-- KPIs -->
+<div class="kpis">
   <div class="kpi"><div class="kl">Buy signals</div><div class="kv g" id="k-buy">—</div><div class="ks">act now</div></div>
-  <div class="kpi"><div class="kl">DCA signals</div><div class="kv b" id="k-dca">—</div><div class="ks">zone active</div></div>
+  <div class="kpi"><div class="kl">DCA zones active</div><div class="kv b" id="k-dca">—</div><div class="ks">increase contribution</div></div>
   <div class="kpi"><div class="kl">Watch signals</div><div class="kv a" id="k-watch">—</div><div class="ks">approaching</div></div>
-  <div class="kpi"><div class="kl">Tickers tracked</div><div class="kv b">20</div><div class="ks">ETFs + FAANG</div></div>
-  <div class="kpi"><div class="kl">Fed rate</div><div class="kv a">4.33%</div><div class="ks">restrictive</div></div>
+  <div class="kpi"><div class="kl">Tickers tracked</div><div class="kv b">15</div><div class="ks">live prices</div></div>
+  <div class="kpi"><div class="kl">Last refresh</div><div class="kv g" id="k-refresh" style="font-size:12px">—</div><div class="ks">auto on load</div></div>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
   <button class="tab active" onclick="showTab('signals')">Signals</button>
   <button class="tab" onclick="showTab('analysis')">Stock Analysis</button>
@@ -187,7 +213,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   <button class="tab" onclick="showTab('calc')">Progress & Calc</button>
 </div>
 
-<!-- SIGNALS PANEL -->
+<!-- SIGNALS -->
 <div class="panel active" id="panel-signals">
   <div class="filter-bar">
     <button class="fbtn on" onclick="filterSig('all',this)">All</button>
@@ -197,12 +223,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <button class="fbtn" onclick="filterSig('stock',this)">Stocks</button>
   </div>
   <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:12px;padding:8px 12px;background:var(--s1);border-radius:8px;border:1px solid var(--border)">
-    <strong style="color:var(--text2)">Long term buy</strong> = deploy lump sum, high conviction entry. &nbsp;|&nbsp; <strong style="color:var(--text2)">DCA zone</strong> = increase your regular contribution based on zone 1–4. Tap any card for details.
+    <strong style="color:var(--text2)">Long term buy</strong> = deploy lump sum, high conviction. &nbsp;|&nbsp; <strong style="color:var(--text2)">DCA zone 1–4</strong> = increase regular contribution by zone amount. All data live from Finnhub.
   </div>
-  <div class="card-grid" id="sig-grid"></div>
+  <div class="card-grid" id="sig-grid"><div style="color:var(--muted);font-family:var(--mono);font-size:12px;padding:20px;text-align:center;grid-column:1/-1">Loading live data...</div></div>
 </div>
 
-<!-- ANALYSIS PANEL -->
+<!-- ANALYSIS -->
 <div class="panel" id="panel-analysis">
   <div class="filter-bar">
     <button class="fbtn on" onclick="filterAna('all',this)">All</button>
@@ -210,41 +236,46 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <button class="fbtn" onclick="filterAna('neutral',this)">Neutral</button>
     <button class="fbtn" onclick="filterAna('bearish',this)">Bearish</button>
   </div>
-  <div class="card-grid" id="ana-grid"></div>
+  <div class="card-grid" id="ana-grid"><div style="color:var(--muted);font-family:var(--mono);font-size:12px;padding:20px;text-align:center;grid-column:1/-1">Loading live data...</div></div>
 </div>
 
-<!-- DCA STRATEGY PANEL -->
+<!-- DCA STRATEGY -->
 <div class="panel" id="panel-dca">
-  <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">Your DCA playbook. These zones appear directly on your signal cards so you always know what action to take.</p>
-  <div class="dca-grid" id="dca-grid"></div>
-  <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:4px">
-    <div style="font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">RSI Setting — why your numbers differ from TradingView</div>
-    <div class="rsi-explain">
-      <strong style="color:var(--text)">The problem:</strong> Your TradingView shows <code style="background:var(--s2);padding:1px 5px;border-radius:3px;color:var(--amber)">RSI,30,10</code> — that is RSI with period 30 and smoothing 10. This dashboard and your bot use <code style="background:var(--s2);padding:1px 5px;border-radius:3px;color:var(--green)">RSI period 14</code> — the global standard.<br><br>
-      <strong style="color:var(--text)">NVDA example:</strong> RSI-14 shows 27 (oversold, buy signal). RSI-30 shows 52 (neutral, no signal). Same stock, same day, completely different story depending on your setting.<br><br>
-      <strong style="color:var(--text)">Fix TradingView to match this dashboard:</strong> Click your RSI indicator on TradingView → Settings → change <strong>Length from 30 to 14</strong>, change <strong>Smoothing from 10 to 1</strong>. Now both will align.<br><br>
-      <strong style="color:var(--text)">Which to trust?</strong> RSI-14 is used by 95% of professional analysts and institutional traders. It is the industry standard. Stick with RSI-14.
+  <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">Your DCA playbook. Signal cards show which zone each ticker is in right now based on live data.</p>
+  <div class="dca-grid">
+    <div class="dca-card dca-z1"><div class="dca-title" style="color:var(--blue)">ZONE 1 — HOLD, STANDARD DCA ONLY</div><div style="margin-bottom:8px"><div class="dca-rule"><span class="tag">trigger</span>Weekly RSI-14: 50–70</div><div class="dca-rule"><span class="tag">trigger</span>Drawdown: under 5%</div></div><div style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:8px">Stick to your fixed monthly amount. No extra. No lump sum. Market is fairly valued.</div><div style="padding:8px 10px;background:#00000030;border-radius:6px;font-size:11px;color:var(--text2);font-family:var(--mono)">e.g. VOO near ATH, RSI 57 → standard monthly DCA only.</div></div>
+    <div class="dca-card dca-z2"><div class="dca-title" style="color:#6fcf50">ZONE 2 — INCREASE DCA BY 50%</div><div style="margin-bottom:8px"><div class="dca-rule"><span class="tag">trigger</span>Weekly RSI-14: 45–55</div><div class="dca-rule"><span class="tag">trigger</span>Pullback: 5–10% from ATH</div></div><div style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:8px">Increase monthly DCA by 50%. Market pulling back but not in crisis.</div><div style="padding:8px 10px;background:#00000030;border-radius:6px;font-size:11px;color:var(--text2);font-family:var(--mono)">e.g. MSFT down 5%, RSI 52 → invest $1,500 instead of $1,000.</div></div>
+    <div class="dca-card dca-z3"><div class="dca-title" style="color:var(--amber)">ZONE 3 — DOUBLE YOUR DCA</div><div style="margin-bottom:8px"><div class="dca-rule"><span class="tag">trigger</span>Weekly RSI-14: 35–45</div><div class="dca-rule"><span class="tag">trigger</span>Pullback: 10–20% from ATH</div></div><div style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:8px">Double your normal monthly DCA. Historically produces strong 12-month returns.</div><div style="padding:8px 10px;background:#00000030;border-radius:6px;font-size:11px;color:var(--text2);font-family:var(--mono)">e.g. META down 12%, weekly RSI 42 → double your monthly allocation.</div></div>
+    <div class="dca-card dca-z4"><div class="dca-title" style="color:var(--red)">ZONE 4 — DEPLOY LUMP SUM</div><div style="margin-bottom:8px"><div class="dca-rule"><span class="tag">trigger</span>Weekly RSI-14: below 35</div><div class="dca-rule"><span class="tag">trigger</span>Drawdown: over 20% from ATH</div><div class="dca-rule"><span class="tag">trigger</span>Price: below SMA200</div></div><div style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:8px">Deploy lump sum from cash reserve. Black swan zone. Rare but act decisively.</div><div style="padding:8px 10px;background:#00000030;border-radius:6px;font-size:11px;color:var(--text2);font-family:var(--mono)">e.g. Market down 20%, VOO weekly RSI 28 → deploy 30–50% of cash reserve.</div></div>
+  </div>
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px">
+    <div style="font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">RSI-14 vs TradingView — why they must match</div>
+    <div style="background:#0a1a14;border:1px solid #1a4030;border-radius:10px;padding:14px;font-size:12px;line-height:1.8;color:var(--text2)">
+      This dashboard uses <strong style="color:var(--green)">RSI Length 14, Smoothing 1</strong>. To match on TradingView: click RSI → Settings → Length = 14, Smoothing Length = 1. Your TradingView was previously set to smoothing 14 which is why NVDA showed 52 there vs 27 here — same stock, very different reading.<br><br>
+      <strong style="color:var(--text)">Daily RSI-14</strong> = last 14 trading days. Use for DCA timing.<br>
+      <strong style="color:var(--text)">Weekly RSI-14</strong> = last 14 weeks. Use for lump sum decisions.
     </div>
   </div>
 </div>
 
-<!-- NEWS PANEL -->
+<!-- NEWS -->
 <div class="panel" id="panel-news">
   <div style="display:flex;gap:16px;margin-bottom:14px;font-size:11px;font-family:var(--mono);flex-wrap:wrap;color:var(--text2)">
     <span><span style="color:var(--green)">●</span> Act now = under 6 hours</span>
     <span><span style="color:var(--amber)">●</span> Still relevant = 6–24 hours</span>
     <span><span style="color:var(--red)">●</span> May have passed = over 24 hours</span>
+    <span style="margin-left:auto;color:var(--muted)">Live from Finnhub · updates on refresh</span>
   </div>
-  <div id="news-feed"></div>
+  <div id="news-feed"><div style="color:var(--muted);font-family:var(--mono);font-size:12px;padding:20px;text-align:center">Loading live news...</div></div>
 </div>
 
-<!-- PROGRESS & CALC PANEL — personal $ info lives here, private -->
+<!-- CALC -->
 <div class="panel" id="panel-calc">
   <div class="prog-section">
     <h2>Retirement Progress Tracker</h2>
-    <p>Private — adjust sliders below to see your projection</p>
+    <p>Private — adjust sliders to see your projection</p>
     <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-    <div class="prog-meta"><span>$0</span><span id="prog-pct">0% to goal</span><span>$3,000,000</span></div>
+    <div class="prog-meta"><span>$0</span><span id="prog-pct">0% to $3M goal</span><span>$3,000,000</span></div>
     <div class="result-grid">
       <div class="res-card"><div class="rl">PROJECTED AT 50</div><div class="rv g" id="r-proj">—</div></div>
       <div class="res-card"><div class="rl">MONTHLY NEEDED</div><div class="rv a" id="r-need">—</div></div>
@@ -254,15 +285,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   </div>
   <div class="calc-section">
     <h2>Compound Calculator</h2>
-    <p>Adjust sliders to model different scenarios</p>
+    <p>Model different contribution and return scenarios</p>
     <div class="calc-row"><label>Current portfolio <span id="vp">$50,000</span></label><input type="range" min="0" max="500000" step="5000" value="50000" id="rp" oninput="calc()"></div>
     <div class="calc-row"><label>Monthly contribution <span id="vc">$2,500/mo</span></label><input type="range" min="200" max="15000" step="100" value="2500" id="rc" oninput="calc()"></div>
     <div class="calc-row"><label>Expected annual return <span id="vr">10.0%</span></label><input type="range" min="6" max="15" step="0.5" value="10" id="rr" oninput="calc()"></div>
     <div class="calc-row"><label>Your current age <span id="va">36</span></label><input type="range" min="25" max="48" value="36" id="ra" oninput="calc()"></div>
-    <div class="tax-note">⚠️ <strong>Singapore tax tip:</strong> VOO, SPY, IVV dividends face 30% US withholding tax for SG residents. Consider <strong>VWRA</strong> (Ireland-domiciled, same S&P 500 exposure, lower tax drag). Meaningful difference over 14 years of compounding.</div>
+    <div class="tax-note">⚠️ <strong>Singapore tax tip:</strong> VOO, SPY, IVV dividends face 30% US withholding tax for SG residents. Consider <strong>VWRA</strong> (Ireland-domiciled, same exposure, lower tax drag over 14 years).</div>
   </div>
 </div>
-
 </div>
 
 <!-- MODAL -->
@@ -271,349 +301,426 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 </div>
 
 <script>
-// ── SIGNAL DATA ───────────────────────────────────────────────────────────────
-// callType: 'LT' = long term lump sum buy, 'DCA' = DCA zone signal, 'WATCH' = monitor, 'HOLD' = hold
-// dcaZone: 1-4 matches the DCA strategy zones
-const SIGNALS = [
-  {ticker:'NVDA',name:'NVIDIA Corp',type:'STOCK',callType:'LT',dcaZone:4,
-   label:'Long term buy — RSI-14 at 27 + 18% drawdown',
-   detail:'Two high-conviction signals firing together. RSI-14 deeply oversold AND significantly off ATH. Rare combination — deploy lump sum.',
-   action:'Deploy lump sum now. Set aside 50% in case it drops further.',
-   rsi_d:'27.4',rsi_w:'38',drawdown:'18.2%',sma:'Below 200d',verdict:'bull'},
+const API_KEY = 'd7j1g69r01qn2qavpvd0d7j1g69r01qn2qavpvdg';
+const BASE = 'https://finnhub.io/api/v1';
 
-  {ticker:'GOOGL',name:'Alphabet Inc',type:'STOCK',callType:'LT',dcaZone:3,
-   label:'Long term buy — 12% pullback, RSI-14 approaching oversold',
-   detail:'Antitrust fear creating a value opportunity. Business fundamentals intact. RSI-14 at 38 nearing buy zone.',
-   action:'Good long term entry. Also increase DCA contribution this month.',
-   rsi_d:'38.1',rsi_w:'42',drawdown:'12.1%',sma:'Below 200d',verdict:'bull'},
-
-  {ticker:'META',name:'Meta Platforms',type:'STOCK',callType:'DCA',dcaZone:3,
-   label:'DCA Zone 3 — 10.8% drawdown, double your contribution',
-   detail:'Solid DCA entry. Not yet deep enough for lump sum but weekly RSI-14 at 44 entering buy territory.',
-   action:'Double your normal monthly DCA allocation to META this month.',
-   rsi_d:'41.2',rsi_w:'44',drawdown:'10.8%',sma:'Near 200d',verdict:'bull'},
-
-  {ticker:'AVGO',name:'Broadcom Inc',type:'STOCK',callType:'LT',dcaZone:4,
-   label:'Long term buy — 14.3% drawdown, RSI-14 at 33',
-   detail:'AI networking chip demand surging. VMware acquisition adding recurring revenue. Strong lump sum case.',
-   action:'Deploy lump sum. One of the highest conviction buys on the list right now.',
-   rsi_d:'33.2',rsi_w:'40',drawdown:'14.3%',sma:'Below 200d',verdict:'bull'},
-
-  {ticker:'AMZN',name:'Amazon',type:'STOCK',callType:'DCA',dcaZone:3,
-   label:'DCA Zone 3 — 9.4% pullback, increase contribution',
-   detail:'AWS cloud growth re-accelerating. Advertising business a growing hidden gem. Good accumulation zone.',
-   action:'Double your monthly DCA. Watch for 15%+ drawdown to trigger lump sum.',
-   rsi_d:'42.5',rsi_w:'46',drawdown:'9.4%',sma:'Near 200d',verdict:'bull'},
-
-  {ticker:'QQQ',name:'Invesco NASDAQ 100',type:'ETF',callType:'DCA',dcaZone:2,
-   label:'DCA Zone 2 — 7.2% off high, increase by 50%',
-   detail:'Broad tech dip across top 100 NASDAQ companies. Not deep enough for lump sum but add to DCA.',
-   action:'Increase your monthly QQQ contribution by 50% this month.',
-   rsi_d:'53',rsi_w:'55',drawdown:'7.2%',sma:'Near 200d',verdict:'bull'},
-
-  {ticker:'MSFT',name:'Microsoft Corp',type:'STOCK',callType:'DCA',dcaZone:2,
-   label:'DCA Zone 2 — 5.3% weekly dip, add to position',
-   detail:'Uptrend intact but mild pullback active. Azure and Copilot growth strong. Increase DCA slightly.',
-   action:'Increase monthly contribution by 50%. Watch for 10%+ dip for lump sum trigger.',
-   rsi_d:'48.2',rsi_w:'52',drawdown:'5.3%',sma:'Above 200d',verdict:'bull'},
-
-  {ticker:'IVV',name:'iShares S&P 500 ETF',type:'ETF',callType:'DCA',dcaZone:2,
-   label:'DCA Zone 2 — 6.8% off high, slight increase',
-   detail:'Same S&P 500 exposure as VOO. Track for DCA entry. Increase contribution slightly.',
-   action:'Increase monthly DCA by 50%. If dip extends to 10%, move to Zone 3.',
-   rsi_d:'54.2',rsi_w:'56',drawdown:'6.8%',sma:'Above 200d',verdict:'bull'},
-
-  {ticker:'VTI',name:'Vanguard Total Market',type:'ETF',callType:'DCA',dcaZone:2,
-   label:'DCA Zone 2 — broader US market dip',
-   detail:'Covers entire US market including small and mid caps. Good diversification add.',
-   action:'Increase monthly DCA by 50%. Useful diversifier alongside VOO.',
-   rsi_d:'51.8',rsi_w:'53',drawdown:'7.1%',sma:'Near 200d',verdict:'bull'},
-
-  {ticker:'VOO',name:'Vanguard S&P 500',type:'ETF',callType:'HOLD',dcaZone:1,
-   label:'DCA Zone 1 — RSI-14 at 53, standard DCA only',
-   detail:'TradingView confirmed daily RSI-14 ~53 (neutral). No major signal. Stick to scheduled monthly DCA amount — do not add extra.',
-   action:'Keep your standard monthly DCA. Do not deploy lump sum here.',
-   rsi_d:'53',rsi_w:'57',drawdown:'2.8%',sma:'Above 200d',verdict:'bull'},
-
-  {ticker:'SPY',name:'SPDR S&P 500 ETF',type:'ETF',callType:'HOLD',dcaZone:1,
-   label:'DCA Zone 1 — standard DCA, near ATH',
-   detail:'Most liquid S&P 500 ETF. Near ATH. Stick to standard DCA schedule only.',
-   action:'Standard monthly DCA only. No extra allocation.',
-   rsi_d:'53',rsi_w:'57',drawdown:'2.9%',sma:'Above 200d',verdict:'bull'},
-
-  {ticker:'AAPL',name:'Apple Inc',type:'STOCK',callType:'WATCH',dcaZone:1,
-   label:'Watch — golden cross forming, not yet a buy',
-   detail:'50d MA approaching 200d MA from below. Bullish setup forming. Wait for confirmation.',
-   action:'Do not buy yet. Set alert for golden cross completion or 10% drawdown.',
-   rsi_d:'52.1',rsi_w:'54',drawdown:'4.1%',sma:'Above 200d',verdict:'neutral'},
-
-  {ticker:'TSLA',name:'Tesla Inc',type:'STOCK',callType:'WATCH',dcaZone:null,
-   label:'Watch with caution — 28% drawdown, weak fundamentals',
-   detail:'Large drawdown but revenue declining and competition intensifying. High beta stock. Speculative only.',
-   action:'Max 3% portfolio allocation. Not a retirement core holding.',
-   rsi_d:'44.0',rsi_w:'40',drawdown:'28.3%',sma:'Below 200d',verdict:'bear'},
-
-  {ticker:'JPM',name:'JPMorgan Chase',type:'STOCK',callType:'DCA',dcaZone:2,
-   label:'DCA Zone 2 — defensive financial add',
-   detail:'High rates benefit banks. Strong balance sheet. Good defensive layer in portfolio.',
-   action:'Increase monthly DCA by 50%. Solid income + growth combo.',
-   rsi_d:'49.2',rsi_w:'51',drawdown:'6.2%',sma:'Above 200d',verdict:'bull'},
-
-  {ticker:'V',name:'Visa Inc',type:'STOCK',callType:'HOLD',dcaZone:1,
-   label:'DCA Zone 1 — payments moat, near ATH',
-   detail:'Irreplaceable payments network. Low volatility. Near ATH so standard DCA only.',
-   action:'Standard monthly DCA. Long term hold.',
-   rsi_d:'58.4',rsi_w:'60',drawdown:'3.1%',sma:'Above 200d',verdict:'bull'},
+const WATCHLIST = [
+  {t:'NVDA',n:'NVIDIA Corp',type:'STOCK',sector:'AI Chips',pe_sector:40},
+  {t:'GOOGL',n:'Alphabet Inc',type:'STOCK',sector:'AI/Ads',pe_sector:28},
+  {t:'META',n:'Meta Platforms',type:'STOCK',sector:'AI/Social',pe_sector:28},
+  {t:'AMZN',n:'Amazon',type:'STOCK',sector:'Cloud/Retail',pe_sector:35},
+  {t:'MSFT',n:'Microsoft Corp',type:'STOCK',sector:'Cloud/AI',pe_sector:30},
+  {t:'AAPL',n:'Apple Inc',type:'STOCK',sector:'Consumer Tech',pe_sector:26},
+  {t:'AVGO',n:'Broadcom Inc',type:'STOCK',sector:'AI Chips',pe_sector:40},
+  {t:'TSLA',n:'Tesla Inc',type:'STOCK',sector:'EV/Auto',pe_sector:25},
+  {t:'JPM',n:'JPMorgan Chase',type:'STOCK',sector:'Finance',pe_sector:14},
+  {t:'V',n:'Visa Inc',type:'STOCK',sector:'Payments',pe_sector:30},
+  {t:'VOO',n:'Vanguard S&P 500',type:'ETF',sector:'ETF',pe_sector:21},
+  {t:'QQQ',n:'Invesco NASDAQ 100',type:'ETF',sector:'ETF',pe_sector:26},
+  {t:'VTI',n:'Vanguard Total Market',type:'ETF',sector:'ETF',pe_sector:21},
+  {t:'IVV',n:'iShares S&P 500',type:'ETF',sector:'ETF',pe_sector:21},
+  {t:'SCHD',n:'Schwab Dividend ETF',type:'ETF',sector:'ETF',pe_sector:18},
 ];
 
-const ANALYSIS=[
-  {ticker:'NVDA',name:'NVIDIA Corp',verdict:'bullish',pe:'35',pe_sector:'40',pe_note:'AI/Semiconductor avg 40x — NVDA below sector, good value',debt:'Low 0.3x',roe:'85%',revenue:'+78% YoY',eps:'+82% YoY',
-   technical:'RSI-14 at 27 — deeply oversold. Weekly RSI-14 at 38 also in buy zone. Price 18% off ATH and below 200-day moving average. Historically this combination is one of the strongest long-term entry setups available.',
-   fundamental:'Controls 70%+ of AI chip market. Data center revenue +78% year-on-year. Net profit margin 55% — exceptional for hardware. Every major cloud provider depends on NVIDIA GPUs.',
-   news:'Dip caused by US export restriction concerns to China. A political headline, not a business problem. Institutions buying this dip.',
-   risk:'If AI spending slows or AMD closes the gap. Geopolitical risk from US-China tensions on chip exports. Medium-term risks.',
-   action:'Strong long term buy zone. Deploy lump sum. Keep 50% of planned allocation in reserve in case it drops further.',
-   metrics:[{l:'P/E Ratio',v:'35x',bench:'Sector avg: 40x',note:'Below sector — good value',cls:'good'},{l:'Revenue growth',v:'+78%',bench:'Good = above 20%',note:'Exceptional',cls:'good'},{l:'Debt/Equity',v:'0.3x',bench:'Good = below 1x',note:'Low debt',cls:'good'},{l:'Daily RSI-14',v:'27.4',bench:'Buy zone = below 30',note:'Oversold — buy signal',cls:'good'},{l:'Weekly RSI-14',v:'38',bench:'Buy zone = below 45',note:'Weekly confirms buy',cls:'good'},{l:'Net margin',v:'55%',bench:'Good = above 20%',note:'Industry leading',cls:'good'}]},
-  {ticker:'MSFT',name:'Microsoft Corp',verdict:'bullish',pe:'32',pe_sector:'30',pe_note:'Software avg 30x — MSFT slightly above but justified by AI growth',debt:'Low 0.4x',roe:'43%',revenue:'+17% YoY',eps:'+20% YoY',
-   technical:'Above 200-day MA — uptrend intact. RSI-14 at 48 neutral. 5% dip is a mild pullback in a strong trend. DCA Zone 2 — increase contribution but no lump sum yet.',
-   fundamental:'Azure cloud +31%. Copilot across all products. Office 365 + LinkedIn + GitHub = diversified moat. One of the safest large-cap retirement stocks.',
-   news:'Last earnings beat estimates. Copilot enterprise growth +50% quarter-on-quarter.',
-   risk:'32x PE slightly above software average. Needs continued execution. Regulatory scrutiny on AI dominance.',
-   action:'DCA Zone 2 — increase monthly contribution by 50%. Lump sum trigger at 10%+ drawdown.',
-   metrics:[{l:'P/E Ratio',v:'32x',bench:'Sector avg: 30x',note:'Slightly above, justified',cls:'warn'},{l:'Revenue growth',v:'+17%',bench:'Good = above 15%',note:'Steady',cls:'good'},{l:'Debt/Equity',v:'0.4x',bench:'Good = below 1x',note:'Low debt',cls:'good'},{l:'Daily RSI-14',v:'48.2',bench:'Neutral = 40 to 60',note:'No signal yet',cls:'warn'},{l:'Weekly RSI-14',v:'52',bench:'Watch = 45 to 60',note:'Neutral',cls:'warn'},{l:'Net margin',v:'36%',bench:'Good = above 20%',note:'Very strong',cls:'good'}]},
-  {ticker:'GOOGL',name:'Alphabet Inc',verdict:'bullish',pe:'22',pe_sector:'28',pe_note:'Internet avg 28x — GOOGL at 22x is best value in all of FAANG',debt:'Net cash',roe:'31%',revenue:'+12% YoY',eps:'+15% YoY',
-   technical:'RSI-14 at 38 approaching oversold. 12% off ATH. Near 200-day MA support. Weekly RSI-14 at 42 in buy zone. Long term buy confirmed.',
-   fundamental:'Search 57% revenue and growing. YouTube accelerating. Google Cloud +28%. Cheapest mega-cap tech with net cash.',
-   news:'Antitrust ruling creating fear. Analysts mostly agree remedies will not break the core business.',
-   risk:'Antitrust breakup (low probability, high impact). AI search disruption from ChatGPT and Perplexity.',
-   action:'Long term buy. Best value in FAANG. 22x vs sector 28x, growing 12%, net cash. Buy the fear.',
-   metrics:[{l:'P/E Ratio',v:'22x',bench:'Sector avg: 28x',note:'Cheap vs sector — value',cls:'good'},{l:'Revenue growth',v:'+12%',bench:'Good = above 10%',note:'Consistent',cls:'good'},{l:'Debt/Equity',v:'Net cash',bench:'Good = no debt',note:'No debt at all',cls:'good'},{l:'Daily RSI-14',v:'38.1',bench:'Buy zone = below 40',note:'Approaching oversold',cls:'good'},{l:'Weekly RSI-14',v:'42',bench:'Buy zone = below 45',note:'Weekly in buy zone',cls:'good'},{l:'Net margin',v:'28%',bench:'Good = above 20%',note:'Strong',cls:'good'}]},
-  {ticker:'META',name:'Meta Platforms',verdict:'bullish',pe:'26',pe_sector:'28',pe_note:'Internet avg 28x — META slightly below and growing faster',debt:'Net cash',roe:'38%',revenue:'+21% YoY',eps:'+73% YoY',
-   technical:'RSI-14 at 41, weekly at 44 entering buy zone. 10.8% off ATH near 200d MA. DCA Zone 3 — double your contribution.',
-   fundamental:'AI assistant at 1B users in record time. Ad revenue +21%. EPS +73%. Business accelerating.',
-   news:'Meta AI adoption exceeding targets. Instagram Reels a major revenue contributor.',
-   risk:'Heavy AI capex $60B+ before clear monetisation. EU regulatory risk.',
-   action:'DCA Zone 3 — double contribution. Long term buy case building. Watch for 15%+ drawdown to trigger lump sum.',
-   metrics:[{l:'P/E Ratio',v:'26x',bench:'Sector avg: 28x',note:'Below average, growing fast',cls:'good'},{l:'Revenue growth',v:'+21%',bench:'Good = above 15%',note:'Accelerating',cls:'good'},{l:'Debt/Equity',v:'Net cash',bench:'Good = no debt',note:'No debt',cls:'good'},{l:'Daily RSI-14',v:'41.2',bench:'Watch zone = 40 to 50',note:'Entering buy zone',cls:'warn'},{l:'EPS growth',v:'+73%',bench:'Good = above 20%',note:'Exceptional',cls:'good'},{l:'Net margin',v:'33%',bench:'Good = above 20%',note:'Expanding',cls:'good'}]},
-  {ticker:'AAPL',name:'Apple Inc',verdict:'neutral',pe:'28',pe_sector:'26',pe_note:'Consumer tech avg 26x — AAPL slightly above with slow growth',debt:'Net cash',roe:'150%+',revenue:'+5% YoY',eps:'+8% YoY',
-   technical:'Golden cross forming — 50d MA approaching 200d from below. RSI-14 at 52 neutral. 4% off ATH. No urgent signal — wait for confirmation or 10% dip.',
-   fundamental:'iPhone dominant. Services +14% high margin. Share buybacks. India manufacturing reduces China risk.',
-   news:'India expansion on track. Apple Intelligence AI features expected to drive upgrade cycle.',
-   risk:'China revenue 18% at geopolitical risk. App Store antitrust pressure. 5% growth means paying 28x for stability not growth.',
-   action:'Not a buy yet. Watch for golden cross to complete or 10% drawdown. DCA Zone 1 — standard monthly contribution only.',
-   metrics:[{l:'P/E Ratio',v:'28x',bench:'Sector avg: 26x',note:'Slightly above',cls:'warn'},{l:'Revenue growth',v:'+5%',bench:'OK = 5 to 10%',note:'Slow but stable',cls:'warn'},{l:'Debt/Equity',v:'Net cash',bench:'Good = no debt',note:'Fortress balance sheet',cls:'good'},{l:'Daily RSI-14',v:'52.1',bench:'Neutral = 40 to 60',note:'No signal',cls:'warn'},{l:'Weekly RSI-14',v:'54',bench:'Neutral zone',note:'Neutral',cls:'warn'},{l:'Net margin',v:'26%',bench:'Good = above 20%',note:'Strong',cls:'good'}]},
-  {ticker:'TSLA',name:'Tesla Inc',verdict:'bearish',pe:'92',pe_sector:'25',pe_note:'Auto/EV avg 25x — TSLA at 92x is extremely expensive for declining revenue',debt:'Medium 0.7x',roe:'14%',revenue:'-9% YoY',eps:'-40% YoY',
-   technical:'28% off ATH. RSI-14 at 44 neutral — not oversold yet, could fall further. Below 200d MA. No clear bottom.',
-   fundamental:'Deliveries declining three consecutive quarters. BYD outselling Tesla in China. Energy too small to offset auto weakness.',
-   news:'Elon Musk political controversy damaging brand. Q1 deliveries missed estimates significantly.',
-   risk:'Extremely high. Declining revenue, intensifying competition, CEO distraction, 92x PE. Speculative, not retirement core.',
-   action:'Not a core retirement holding. Maximum 3% if you want speculative exposure. Better options available elsewhere.',
-   metrics:[{l:'P/E Ratio',v:'92x',bench:'Sector avg: 25x',note:'Very expensive for decline',cls:'bad'},{l:'Revenue growth',v:'-9%',bench:'Bad = negative',note:'Declining',cls:'bad'},{l:'Debt/Equity',v:'0.7x',bench:'OK = 0.5 to 1x',note:'Manageable',cls:'warn'},{l:'Daily RSI-14',v:'44.0',bench:'Neutral = 40 to 60',note:'No buy signal',cls:'warn'},{l:'EPS growth',v:'-40%',bench:'Bad = negative',note:'Collapsing',cls:'bad'},{l:'Net margin',v:'5%',bench:'OK = 10 to 20%',note:'Compressed',cls:'bad'}]},
-];
+// Cache live data
+let liveData = {};
+let sigFilter = 'all', anaFilter = 'all';
+let loadErrors = 0;
 
-const DCA_RULES=[
-  {theme:'dca-z1',color:'var(--blue)',title:'ZONE 1 — HOLD, STANDARD DCA ONLY',
-   triggers:['Weekly RSI-14: 50–70','Drawdown: under 5% from ATH','Price: near all-time high'],
-   action:'Stick exactly to your fixed monthly amount. No extra. No lump sum. Market is fairly valued or expensive.',
-   example:'VOO RSI-14 at 53, 2.8% off ATH → send your regular monthly DCA, nothing more.'},
-  {theme:'dca-z2',color:'#6fcf50',title:'ZONE 2 — INCREASE DCA BY 50%',
-   triggers:['Weekly RSI-14: 45–55','Pullback: 5–10% from ATH','Price: above or at 200d MA'],
-   action:'Increase your monthly DCA by 50%. If you normally invest $1,000/month, invest $1,500. Market is pulling back but not in crisis.',
-   example:'MSFT down 5.3%, weekly RSI-14 at 52 → invest $1,500 instead of $1,000 this month.'},
-  {theme:'dca-z3',color:'var(--amber)',title:'ZONE 3 — DOUBLE YOUR DCA',
-   triggers:['Weekly RSI-14: 35–45','Pullback: 10–20% from ATH','Price: near or below 200d MA'],
-   action:'Double your normal monthly DCA. This zone historically produces strong 12-month returns. GOOGL, META, AMZN are here right now.',
-   example:'META down 10.8%, weekly RSI-14 at 44 → invest double your normal META allocation this month.'},
-  {theme:'dca-z4',color:'var(--red)',title:'ZONE 4 — DEPLOY LUMP SUM',
-   triggers:['Weekly RSI-14: below 35','Drawdown: over 20% from ATH','Price: below SMA200 + SMA300','Market correction: 20% or more'],
-   action:'Deploy a lump sum from your cash reserve. Emergency fund stays untouched. This is the black swan zone — rare, maybe once every 2–3 years. NVDA and AVGO are here now.',
-   example:'NVDA down 18%, RSI-14 daily 27, weekly 38 → deploy planned lump sum. This is the signal you wait for.'},
-];
+// ── API CALLS ────────────────────────────────────────────────────────────────
 
-const NEWS=[
-  {ticker:'NVDA',title:'NVIDIA data center revenue hits record as hyperscalers accelerate AI infrastructure spend',source:'Reuters',h:2,sentiment:'positive'},
-  {ticker:'MSFT',title:'Microsoft Azure growth beats estimates; Copilot enterprise adoption cited as key driver',source:'Bloomberg',h:4,sentiment:'positive'},
-  {ticker:'GOOGL',title:'Alphabet antitrust ruling: most analysts see limited structural impact to core ad revenue',source:'WSJ',h:5,sentiment:'neutral'},
-  {ticker:'META',title:'Meta AI assistant surpasses 1 billion users — fastest product adoption in company history',source:'CNBC',h:6,sentiment:'positive'},
-  {ticker:'AVGO',title:'Broadcom AI networking chip backlog extends to 18 months as hyperscaler demand surges',source:'FT',h:8,sentiment:'positive'},
-  {ticker:'AAPL',title:'Apple India manufacturing on track — analysts upgrade on reduced China supply chain risk',source:'Bloomberg',h:10,sentiment:'positive'},
-  {ticker:'TSLA',title:'Tesla Q1 deliveries miss estimates for third consecutive quarter; BYD widens China lead',source:'Reuters',h:12,sentiment:'negative'},
-  {ticker:'AMZN',title:'AWS signs $10B sovereign AI infrastructure deal; cloud backlog reaches record $189B',source:'Bloomberg',h:16,sentiment:'positive'},
-  {ticker:'JPM',title:'JPMorgan Q1 profit rises 9% — net interest income beats as elevated rates persist',source:'FT',h:20,sentiment:'positive'},
-  {ticker:'VOO',title:'S&P 500 forward P/E at 21x — elevated but supported by strong earnings growth revisions',source:'Morningstar',h:26,sentiment:'neutral'},
-  {ticker:'FED',title:'Fed minutes: patient approach confirmed — no rate cuts until inflation sustainably at 2%',source:'AP',h:30,sentiment:'neutral'},
-  {ticker:'QQQ',title:'Nasdaq 100 reporting strongest earnings season since 2021 — tech broadly outperforming',source:'MarketWatch',h:38,sentiment:'positive'},
-];
-
-// ── RENDER ────────────────────────────────────────────────────────────────────
-let sigF='all',anaF='all';
-
-function dcaZoneBadge(s){
-  if(s.callType==='LT') return `<span class="badge b-lt">LONG TERM BUY</span>`;
-  if(s.callType==='DCA'){
-    const cls=['','b-dca1','b-dca2','b-dca3','b-dca4'][s.dcaZone]||'b-dca1';
-    return `<span class="badge ${cls}">DCA ZONE ${s.dcaZone}</span>`;
-  }
-  if(s.callType==='WATCH') return `<span class="badge b-watch">WATCH</span>`;
-  return `<span class="badge b-hold">HOLD</span>`;
+async function apiFetch(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
 }
 
-function dcaZonePill(s){
+async function getQuote(ticker) {
+  return apiFetch(`${BASE}/quote?symbol=${ticker}&token=${API_KEY}`);
+}
+
+async function getMetrics(ticker) {
+  return apiFetch(`${BASE}/stock/metric?symbol=${ticker}&metric=all&token=${API_KEY}`);
+}
+
+async function getRSI(ticker) {
+  const now = Math.floor(Date.now()/1000);
+  const from = now - (365*24*3600); // 1 year of daily candles
+  const data = await apiFetch(`${BASE}/indicator?symbol=${ticker}&resolution=D&from=${from}&to=${now}&indicator=rsi&timeperiod=14&token=${API_KEY}`);
+  const rsiArr = data.rsi || [];
+  return rsiArr.length ? rsiArr[rsiArr.length-1] : null;
+}
+
+async function getNews(ticker) {
+  const today = new Date();
+  const from = new Date(today - 3*24*3600*1000).toISOString().split('T')[0];
+  const to = today.toISOString().split('T')[0];
+  return apiFetch(`${BASE}/company-news?symbol=${ticker}&from=${from}&to=${to}&token=${API_KEY}`);
+}
+
+// ── COMPUTE SIGNALS ──────────────────────────────────────────────────────────
+
+function computeSignal(ticker, meta, quote, metrics, rsi) {
+  const price = quote.c || 0;
+  const prevClose = quote.pc || price;
+  const high52 = metrics?.metric?.['52WeekHigh'] || price;
+  const low52 = metrics?.metric?.['52WeekLow'] || price;
+  const pe = metrics?.metric?.peBasicExclExtraTTM || null;
+  const revenueGrowth = metrics?.metric?.revenueGrowthTTMYoy || null;
+  const netMargin = metrics?.metric?.netProfitMarginTTM || null;
+  const debtEquity = metrics?.metric?.totalDebt2TotalEquityAnnual || null;
+  const roe = metrics?.metric?.roeTTM || null;
+  const changeDay = ((price - prevClose)/prevClose*100);
+  const drawdownFromHigh = ((high52 - price)/high52*100);
+
+  // Determine call type and DCA zone
+  let callType, dcaZone, label, detail, action, verdict;
+
+  if (rsi !== null && rsi < 30 && drawdownFromHigh > 15) {
+    callType = 'LT'; dcaZone = 4; verdict = 'bull';
+    label = `Long term buy — RSI-14 ${rsi.toFixed(1)} + ${drawdownFromHigh.toFixed(1)}% off 52w high`;
+    detail = 'Dual signal: deeply oversold RSI AND significant pullback. Highest conviction long term entry.';
+    action = 'Deploy lump sum. Consider staging 50% now, 50% if it drops further.';
+  } else if (rsi !== null && rsi < 35 && drawdownFromHigh > 10) {
+    callType = 'LT'; dcaZone = 4; verdict = 'bull';
+    label = `Long term buy — RSI-14 ${rsi.toFixed(1)}, ${drawdownFromHigh.toFixed(1)}% off high`;
+    detail = 'RSI approaching deeply oversold with meaningful drawdown. Strong long term entry signal.';
+    action = 'Deploy lump sum. High conviction zone.';
+  } else if (drawdownFromHigh > 20 && (rsi === null || rsi < 45)) {
+    callType = 'LT'; dcaZone = 4; verdict = 'bull';
+    label = `Long term buy — ${drawdownFromHigh.toFixed(1)}% off 52-week high`;
+    detail = 'Significant drawdown from peak. Long term buyers historically rewarded at these levels.';
+    action = 'Deploy lump sum from cash reserve.';
+  } else if (rsi !== null && rsi < 40 && drawdownFromHigh > 8) {
+    callType = 'DCA'; dcaZone = 3; verdict = 'bull';
+    label = `DCA Zone 3 — RSI-14 ${rsi.toFixed(1)}, ${drawdownFromHigh.toFixed(1)}% pullback`;
+    detail = 'RSI approaching oversold with notable pullback. Double your monthly contribution.';
+    action = 'Double your normal monthly DCA allocation this month.';
+  } else if (drawdownFromHigh > 10 && (rsi === null || rsi < 50)) {
+    callType = 'DCA'; dcaZone = 3; verdict = 'bull';
+    label = `DCA Zone 3 — ${drawdownFromHigh.toFixed(1)}% off 52-week high`;
+    detail = '10%+ pullback from recent peak. Strong case to increase DCA contributions.';
+    action = 'Double your monthly DCA allocation.';
+  } else if (drawdownFromHigh > 5 && (rsi === null || rsi < 55)) {
+    callType = 'DCA'; dcaZone = 2; verdict = 'bull';
+    label = `DCA Zone 2 — ${drawdownFromHigh.toFixed(1)}% off 52-week high`;
+    detail = 'Mild pullback in progress. Good opportunity to increase regular contributions.';
+    action = 'Increase monthly DCA by 50%.';
+  } else if (changeDay < -3) {
+    callType = 'DCA'; dcaZone = 2; verdict = 'neutral';
+    label = `DCA Zone 2 — ${Math.abs(changeDay).toFixed(1)}% down today`;
+    detail = 'Single day dip. Monitor for continuation. Slight DCA increase appropriate.';
+    action = 'Increase this month\'s contribution by 50%.';
+  } else {
+    callType = 'HOLD'; dcaZone = 1; verdict = drawdownFromHigh < 3 ? 'bull' : 'neutral';
+    label = `DCA Zone 1 — ${rsi !== null ? `RSI-14 ${rsi.toFixed(1)}, ` : ''}${drawdownFromHigh.toFixed(1)}% off 52w high`;
+    detail = 'No major signal. Standard DCA on your scheduled dates. Do not add extra.';
+    action = 'Stick to your regular monthly DCA. No lump sum.';
+  }
+
+  // Override for TSLA — high risk
+  if (ticker === 'TSLA' && pe && pe > 80) {
+    verdict = 'bear';
+  }
+
+  return {
+    ticker, name: meta.n, type: meta.type,
+    callType, dcaZone, label, detail, action, verdict,
+    price, changeDay, drawdownFromHigh, rsi,
+    pe, revenueGrowth, netMargin, debtEquity, roe,
+    high52, low52, pe_sector: meta.pe_sector,
+  };
+}
+
+// ── LOAD ALL DATA ────────────────────────────────────────────────────────────
+
+async function loadAllData() {
+  showLoading(true);
+  clearError();
+  loadErrors = 0;
+
+  const dot = document.getElementById('live-dot');
+  dot.className = 'live-dot loading';
+  document.getElementById('api-status').textContent = 'Fetching...';
+
+  const signals = [];
+  const total = WATCHLIST.length;
+  let done = 0;
+
+  // Load tickers with small delay to respect rate limit
+  for (const meta of WATCHLIST) {
+    try {
+      const [quote, metrics, rsi] = await Promise.all([
+        getQuote(meta.t),
+        getMetrics(meta.t),
+        getRSI(meta.t),
+      ]);
+      const sig = computeSignal(meta.t, meta, quote, metrics, rsi);
+      liveData[meta.t] = sig;
+      signals.push(sig);
+    } catch(e) {
+      loadErrors++;
+      console.error(`Error loading ${meta.t}:`, e);
+      // Add placeholder so card still shows
+      signals.push({
+        ticker: meta.t, name: meta.n, type: meta.type,
+        callType: 'HOLD', dcaZone: 1, verdict: 'neutral',
+        label: 'Data unavailable — rate limit or API error',
+        detail: 'Click Refresh to retry. If persists, wait 1 minute.',
+        action: 'Retry in 1 minute.', price: 0, changeDay: 0,
+        drawdownFromHigh: 0, rsi: null, pe: null,
+        pe_sector: meta.pe_sector,
+      });
+    }
+    done++;
+    setProgress(done/total*80);
+    // Small delay between batches
+    if (done % 3 === 0) await sleep(500);
+  }
+
+  // Load news for top 5 tickers
+  let news = [];
+  try {
+    const newsTickers = ['NVDA','MSFT','GOOGL','META','AAPL'];
+    const newsResults = await Promise.all(newsTickers.map(t => getNews(t).catch(()=>[])));
+    newsResults.forEach((items, i) => {
+      (items||[]).slice(0,3).forEach(item => {
+        news.push({...item, ticker: newsTickers[i]});
+      });
+    });
+    news.sort((a,b) => b.datetime - a.datetime);
+  } catch(e) {
+    console.error('News error:', e);
+  }
+
+  setProgress(100);
+
+  // Update UI
+  renderSignals(signals);
+  renderAnalysis(signals);
+  renderNews(news);
+  updateKPIs(signals);
+
+  const now = new Date(Date.now()+8*3600000).toISOString().substr(11,8);
+  document.getElementById('k-refresh').textContent = now+' SGT';
+
+  if (loadErrors > 0) {
+    showError(`Failed to load ${loadErrors} ticker(s). This may mean the API rate limit was hit (60 calls/min). Wait 1 minute and click Refresh.`);
+    dot.className = 'live-dot error';
+    document.getElementById('api-status').textContent = `${loadErrors} errors`;
+  } else {
+    dot.className = 'live-dot';
+    document.getElementById('api-status').textContent = 'Live';
+  }
+
+  showLoading(false);
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function setProgress(pct){ document.getElementById('loading-progress').style.width = pct+'%'; }
+function showLoading(show){
+  const bar = document.getElementById('loading-bar');
+  bar.classList.toggle('show', show);
+  if (!show) setTimeout(()=>setProgress(0), 500);
+}
+function showError(msg){
+  document.getElementById('api-error-msg').textContent = msg;
+  document.getElementById('api-banner').classList.add('show');
+}
+function clearError(){ document.getElementById('api-banner').classList.remove('show'); }
+
+// ── RENDER SIGNALS ────────────────────────────────────────────────────────────
+
+function updateKPIs(signals) {
+  document.getElementById('k-buy').textContent = signals.filter(s=>s.callType==='LT').length;
+  document.getElementById('k-dca').textContent = signals.filter(s=>s.callType==='DCA').length;
+  document.getElementById('k-watch').textContent = signals.filter(s=>s.callType==='WATCH').length;
+}
+
+function dcaBadge(s) {
+  if(s.callType==='LT') return `<span class="badge b-lt">LONG TERM BUY</span>`;
+  if(s.callType==='DCA') return `<span class="badge b-dca${s.dcaZone}">DCA ZONE ${s.dcaZone}</span>`;
+  if(s.callType==='WATCH') return `<span class="badge b-watch">WATCH</span>`;
+  return `<span class="badge b-hold">ZONE 1 — HOLD</span>`;
+}
+
+function dcaPill(s) {
   if(s.callType==='LT') return `<div class="dca-zone-pill z4">Zone 4 — deploy lump sum</div>`;
-  if(s.callType==='DCA'){
-    const labels=['','Zone 1 — standard DCA','Zone 2 — increase 50%','Zone 3 — double DCA','Zone 4 — lump sum'];
-    const cls=['','z1','z2','z3','z4'][s.dcaZone]||'z1';
-    return `<div class="dca-zone-pill ${cls}">${labels[s.dcaZone]||''}</div>`;
+  if(s.callType==='DCA') {
+    const labels=['','Zone 1 — standard','Zone 2 — +50% DCA','Zone 3 — double DCA','Zone 4 — lump sum'];
+    return `<div class="dca-zone-pill z${s.dcaZone}">${labels[s.dcaZone]}</div>`;
   }
   if(s.callType==='HOLD') return `<div class="dca-zone-pill z1">Zone 1 — standard DCA only</div>`;
   return '';
 }
 
-function renderSignals(){
-  let d=SIGNALS;
-  if(sigF==='lt') d=d.filter(s=>s.callType==='LT');
-  else if(sigF==='dca') d=d.filter(s=>s.callType==='DCA'||s.callType==='HOLD');
-  else if(sigF==='etf') d=d.filter(s=>s.type==='ETF');
-  else if(sigF==='stock') d=d.filter(s=>s.type==='STOCK');
+function rsiColor(rsi) {
+  if(rsi===null) return '';
+  return rsi < 30 ? 'g' : rsi < 45 ? 'a' : rsi > 70 ? 'r' : '';
+}
 
-  const buys=SIGNALS.filter(s=>s.callType==='LT').length;
-  const dcas=SIGNALS.filter(s=>s.callType==='DCA').length;
-  const watches=SIGNALS.filter(s=>s.callType==='WATCH').length;
-  document.getElementById('k-buy').textContent=buys;
-  document.getElementById('k-dca').textContent=dcas;
-  document.getElementById('k-watch').textContent=watches;
+function renderSignals(signals) {
+  let d = signals;
+  if(sigFilter==='lt') d = d.filter(s=>s.callType==='LT');
+  else if(sigFilter==='dca') d = d.filter(s=>s.callType==='DCA'||s.callType==='HOLD');
+  else if(sigFilter==='etf') d = d.filter(s=>s.type==='ETF');
+  else if(sigFilter==='stock') d = d.filter(s=>s.type==='STOCK');
 
-  document.getElementById('sig-grid').innerHTML=d.map(s=>`
-    <div class="sig-card" onclick="openSignal('${s.ticker}')">
+  document.getElementById('sig-grid').innerHTML = d.map(s => `
+    <div class="sig-card" onclick="openModal('${s.ticker}')">
       <div class="sig-top">
         <div>
           <div class="sig-ticker ${s.callType==='LT'?'b':s.callType==='DCA'?'g':''}">${s.ticker}</div>
           <div style="font-size:10px;color:var(--muted);font-family:var(--mono)">${s.name}</div>
+          ${s.price ? `<div style="font-family:var(--mono);font-size:13px;color:var(--text);margin-top:2px">$${s.price.toFixed(2)} <span style="color:${s.changeDay>=0?'var(--green)':'var(--red)'};font-size:11px">${s.changeDay>=0?'+':''}${s.changeDay.toFixed(2)}%</span></div>` : ''}
         </div>
         <div class="badges">
-          ${dcaZoneBadge(s)}
+          ${dcaBadge(s)}
           <span class="badge ${s.verdict==='bull'?'b-bull':s.verdict==='neutral'?'b-neutral':'b-bear'}">${s.verdict==='bull'?'BULLISH':s.verdict==='neutral'?'NEUTRAL':'BEARISH'}</span>
+          <span class="live-badge">LIVE</span>
         </div>
       </div>
       <div class="sig-label">${s.label}</div>
       <div class="sig-detail">${s.detail}</div>
-      ${dcaZonePill(s)}
+      ${dcaPill(s)}
       <div class="sig-metrics">
-        <div class="sm-box"><div class="ml">RSI-14 Daily</div><div class="mv ${parseFloat(s.rsi_d)<30?'g':parseFloat(s.rsi_d)<45?'a':''}">${s.rsi_d}</div></div>
-        <div class="sm-box"><div class="ml">RSI-14 Weekly</div><div class="mv ${parseFloat(s.rsi_w)<35?'g':parseFloat(s.rsi_w)<45?'a':''}">${s.rsi_w}</div></div>
-        <div class="sm-box"><div class="ml">Drawdown</div><div class="mv a">${s.drawdown}</div></div>
-        <div class="sm-box"><div class="ml">200d MA</div><div class="mv" style="font-size:10px;color:var(--text2)">${s.sma}</div></div>
+        <div class="sm-box"><div class="ml">RSI-14</div><div class="mv ${rsiColor(s.rsi)}">${s.rsi !== null ? s.rsi.toFixed(1) : '—'}</div></div>
+        <div class="sm-box"><div class="ml">Off 52w high</div><div class="mv ${s.drawdownFromHigh>15?'r':s.drawdownFromHigh>8?'a':''}">${s.drawdownFromHigh.toFixed(1)}%</div></div>
+        <div class="sm-box"><div class="ml">P/E</div><div class="mv ${s.pe&&s.pe<s.pe_sector?'g':s.pe&&s.pe>s.pe_sector*1.5?'r':'a'}">${s.pe ? s.pe.toFixed(1)+'x' : '—'}</div></div>
+        <div class="sm-box"><div class="ml">Today</div><div class="mv ${s.changeDay>=0?'g':'r'}">${s.changeDay>=0?'+':''}${s.changeDay.toFixed(1)}%</div></div>
       </div>
       <div class="tap-hint">Tap for full analysis →</div>
     </div>`).join('');
 }
 
-function renderAnalysis(){
-  let d=ANALYSIS;
-  if(anaF==='bullish') d=d.filter(a=>a.verdict==='bullish');
-  else if(anaF==='neutral') d=d.filter(a=>a.verdict==='neutral');
-  else if(anaF==='bearish') d=d.filter(a=>a.verdict==='bearish');
-  document.getElementById('ana-grid').innerHTML=d.map(a=>`
-    <div class="sig-card" onclick="openAnalysis('${a.ticker}')">
+function renderAnalysis(signals) {
+  let d = signals;
+  if(anaFilter==='bullish') d = d.filter(s=>s.verdict==='bull');
+  else if(anaFilter==='neutral') d = d.filter(s=>s.verdict==='neutral');
+  else if(anaFilter==='bearish') d = d.filter(s=>s.verdict==='bear');
+
+  document.getElementById('ana-grid').innerHTML = d.map(a => `
+    <div class="sig-card" onclick="openModal('${a.ticker}')">
       <div class="sig-top">
-        <div><div class="sig-ticker">${a.ticker}</div><div style="font-size:10px;color:var(--muted);font-family:var(--mono)">${a.name}</div></div>
-        <span class="badge ${a.verdict==='bullish'?'b-bull':a.verdict==='neutral'?'b-neutral':'b-bear'}">${a.verdict.toUpperCase()}</span>
+        <div>
+          <div class="sig-ticker">${a.ticker}</div>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono)">${a.name}</div>
+          ${a.price ? `<div style="font-family:var(--mono);font-size:13px;color:var(--text);margin-top:2px">$${a.price.toFixed(2)}</div>` : ''}
+        </div>
+        <div class="badges">
+          <span class="badge ${a.verdict==='bull'?'b-bull':a.verdict==='neutral'?'b-neutral':'b-bear'}">${a.verdict==='bull'?'BULLISH':a.verdict==='neutral'?'NEUTRAL':'BEARISH'}</span>
+          <span class="live-badge">LIVE</span>
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">P/E VS SECTOR</div><div style="font-family:var(--mono);font-size:13px;font-weight:500;color:${parseInt(a.pe)<parseInt(a.pe_sector)?'var(--green)':parseInt(a.pe)>parseInt(a.pe_sector)*1.5?'var(--red)':'var(--amber)'}">${a.pe}x <span style="font-size:10px;color:var(--muted)">/ avg ${a.pe_sector}x</span></div></div>
-        <div><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">REVENUE</div><div style="font-family:var(--mono);font-size:13px;font-weight:500;color:${a.revenue.startsWith('-')?'var(--red)':'var(--green)'}">${a.revenue}</div></div>
-        <div><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">DEBT</div><div style="font-family:var(--mono);font-size:12px;font-weight:500;color:var(--green)">${a.debt}</div></div>
-        <div><div style="font-size:9px;color:var(--muted);font-family:var(--mono)">EPS GROWTH</div><div style="font-family:var(--mono);font-size:12px;font-weight:500;color:${a.eps.startsWith('-')?'var(--red)':'var(--green)'}">${a.eps}</div></div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);font-family:var(--mono)">P/E VS SECTOR</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:500;color:${a.pe&&a.pe<a.pe_sector?'var(--green)':a.pe&&a.pe>a.pe_sector*1.5?'var(--red)':'var(--amber)'}">
+            ${a.pe ? a.pe.toFixed(1)+'x' : '—'} <span style="font-size:10px;color:var(--muted)">/ avg ${a.pe_sector}x</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);font-family:var(--mono)">RSI-14</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:500;color:${a.rsi&&a.rsi<30?'var(--green)':a.rsi&&a.rsi>70?'var(--red)':'var(--amber)'}">${a.rsi ? a.rsi.toFixed(1) : '—'}</div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);font-family:var(--mono)">52W DRAWDOWN</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:500;color:${a.drawdownFromHigh>15?'var(--red)':a.drawdownFromHigh>8?'var(--amber)':'var(--green)'}">${a.drawdownFromHigh.toFixed(1)}%</div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);font-family:var(--mono)">NET MARGIN</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:500;color:${a.netMargin&&a.netMargin>20?'var(--green)':a.netMargin&&a.netMargin>10?'var(--amber)':'var(--red)'}">${a.netMargin ? a.netMargin.toFixed(1)+'%' : '—'}</div>
+        </div>
       </div>
-      <div class="verdict-box ${a.verdict==='bullish'?'vbox-bull':a.verdict==='neutral'?'vbox-neutral':'vbox-bear'}">
-        <div class="vbox-title" style="color:${a.verdict==='bullish'?'var(--green)':a.verdict==='neutral'?'var(--amber)':'var(--red)'}">${a.verdict==='bullish'?'✓ Buy candidate':a.verdict==='neutral'?'→ Hold / DCA only':'✗ Avoid as retirement core'}</div>
+      <div class="verdict-box ${a.verdict==='bull'?'vbox-bull':a.verdict==='neutral'?'vbox-neutral':'vbox-bear'}">
+        <div class="vbox-title" style="color:${a.verdict==='bull'?'var(--green)':a.verdict==='neutral'?'var(--amber)':'var(--red)'}">
+          ${a.verdict==='bull'?'✓ Buy candidate':a.verdict==='neutral'?'→ Hold / DCA only':'✗ Approach with caution'}
+        </div>
       </div>
-      <div class="tap-hint" style="margin-top:8px">Tap for full breakdown with benchmarks →</div>
+      <div class="tap-hint" style="margin-top:8px">Tap for full live breakdown →</div>
     </div>`).join('');
 }
 
-function renderDCA(){
-  document.getElementById('dca-grid').innerHTML=DCA_RULES.map(r=>`
-    <div class="dca-card ${r.theme}">
-      <div class="dca-title" style="color:${r.color}">${r.title}</div>
-      <div style="margin-bottom:8px">${r.triggers.map(t=>`<div class="dca-rule"><span class="tag">trigger</span><span>${t}</span></div>`).join('')}</div>
-      <div style="font-size:12px;font-weight:500;color:var(--text);line-height:1.5;margin-bottom:8px">${r.action}</div>
-      <div style="padding:8px 10px;background:#00000030;border-radius:6px;font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.5">e.g. ${r.example}</div>
-    </div>`).join('');
-}
+// ── RENDER NEWS ───────────────────────────────────────────────────────────────
 
-function renderNews(){
-  document.getElementById('news-feed').innerHTML=NEWS.map(n=>{
-    const fc=n.h<6?'fresh-now':n.h<24?'fresh-ok':'fresh-old';
-    const fl=n.h<6?'Act now':n.h<24?'Still relevant':'May have passed';
-    const ft=n.h<1?'<1h ago':n.h+'h ago';
+function renderNews(news) {
+  if (!news || !news.length) {
+    document.getElementById('news-feed').innerHTML = '<div style="color:var(--muted);font-family:var(--mono);font-size:12px;padding:20px;text-align:center">No recent news found. Try refreshing.</div>';
+    return;
+  }
+  const now = Math.floor(Date.now()/1000);
+  document.getElementById('news-feed').innerHTML = news.slice(0,15).map(n => {
+    const age = (now - n.datetime) / 3600;
+    const fc = age < 6 ? 'fresh-now' : age < 24 ? 'fresh-ok' : 'fresh-old';
+    const fl = age < 1 ? 'Just now' : age < 6 ? 'Act now' : age < 24 ? 'Still relevant' : 'May have passed';
+    const ft = age < 1 ? '<1h ago' : age < 24 ? Math.round(age)+'h ago' : Math.round(age/24)+'d ago';
     return `<div class="news-item">
       <span class="news-lbadge">${n.ticker}</span>
-      <div><div class="news-title">${n.title}</div><div class="news-meta">${n.source} · ${ft}</div></div>
+      <div>
+        <a href="${n.url}" target="_blank" style="text-decoration:none">
+          <div class="news-title" style="color:var(--text)">${n.headline}</div>
+        </a>
+        <div class="news-src">${n.source} · ${ft}</div>
+      </div>
       <div class="news-right">
         <span class="freshness ${fc}">${fl}</span>
-        <span class="${n.sentiment==='positive'?'sent-pos':n.sentiment==='negative'?'sent-neg':'sent-neu'}">${n.sentiment}</span>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── MODALS ────────────────────────────────────────────────────────────────────
-function openSignal(ticker){
-  const a=ANALYSIS.find(x=>x.ticker===ticker);
-  if(a){openAnalysis(ticker);return;}
-  const s=SIGNALS.find(x=>x.ticker===ticker);
-  if(!s)return;
-  document.getElementById('modal-body').innerHTML=`
-    <div class="modal-hdr">
-      <div><div class="modal-ticker">${s.ticker}</div><div class="modal-name">${s.name} · ${s.type}</div></div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="sec-title">Signal & recommended action</div>
-    <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:10px">${s.label}</div>
-    <div style="padding:12px;background:var(--s2);border-radius:10px;font-size:13px;color:var(--green);font-weight:500;margin-bottom:12px;border:1px solid var(--border)">Action: ${s.action}</div>
-    <div class="metrics-grid">
-      <div class="metric-box"><div class="ml">Daily RSI-14</div><div class="mv ${parseFloat(s.rsi_d)<30?'g':'a'}">${s.rsi_d}</div><div class="mbench">Buy = below 30. Neutral = 40–60.</div><div class="mrate ${parseFloat(s.rsi_d)<30?'rate-good':parseFloat(s.rsi_d)<45?'rate-ok':'rate-bad'}">${parseFloat(s.rsi_d)<30?'Oversold — buy':parseFloat(s.rsi_d)<45?'Watch zone':'Neutral'}</div></div>
-      <div class="metric-box"><div class="ml">Weekly RSI-14</div><div class="mv ${parseFloat(s.rsi_w)<35?'g':parseFloat(s.rsi_w)<45?'a':''}">${s.rsi_w}</div><div class="mbench">Use for lump sum. Below 45 = entry zone.</div><div class="mrate ${parseFloat(s.rsi_w)<35?'rate-good':parseFloat(s.rsi_w)<45?'rate-ok':'rate-bad'}">${parseFloat(s.rsi_w)<35?'Strong buy':parseFloat(s.rsi_w)<45?'Watch zone':'Neutral'}</div></div>
-      <div class="metric-box"><div class="ml">Drawdown</div><div class="mv a">${s.drawdown}</div><div class="mbench">10% = Zone 3 DCA. 20% = Zone 4 lump sum.</div></div>
-    </div>`;
-  document.getElementById('modal').classList.add('open');
-}
+// ── MODAL ─────────────────────────────────────────────────────────────────────
 
-function openAnalysis(ticker){
-  const a=ANALYSIS.find(x=>x.ticker===ticker);
-  if(!a)return;
-  const vc=a.verdict==='bullish'?'vbox-bull':a.verdict==='neutral'?'vbox-neutral':'vbox-bear';
-  const vcol=a.verdict==='bullish'?'var(--green)':a.verdict==='neutral'?'var(--amber)':'var(--red)';
-  document.getElementById('modal-body').innerHTML=`
+function openModal(ticker) {
+  const s = liveData[ticker];
+  if (!s) return;
+
+  const vc = s.verdict==='bull' ? 'vbox-bull' : s.verdict==='neutral' ? 'vbox-neutral' : 'vbox-bear';
+  const vcol = s.verdict==='bull' ? 'var(--green)' : s.verdict==='neutral' ? 'var(--amber)' : 'var(--red)';
+
+  const rows = [
+    {l:'P/E Ratio', v: s.pe ? s.pe.toFixed(1)+'x' : '—', bench:`Sector avg: ${s.pe_sector}x`, note: s.pe ? (s.pe < s.pe_sector ? 'Below sector — good value' : s.pe > s.pe_sector*1.3 ? 'Above sector — premium' : 'Near sector average') : 'N/A', cls: s.pe ? (s.pe < s.pe_sector ? 'good' : s.pe > s.pe_sector*1.5 ? 'bad' : 'warn') : 'warn'},
+    {l:'RSI-14 (Daily)', v: s.rsi ? s.rsi.toFixed(1) : '—', bench:'Buy zone = below 30', note: s.rsi ? (s.rsi < 30 ? 'Oversold — strong buy' : s.rsi < 45 ? 'Approaching buy zone' : s.rsi > 70 ? 'Overbought — caution' : 'Neutral') : 'N/A', cls: s.rsi ? (s.rsi < 35 ? 'good' : s.rsi > 65 ? 'bad' : 'warn') : 'warn'},
+    {l:'52-week Drawdown', v: s.drawdownFromHigh.toFixed(1)+'%', bench:'20%+ = lump sum zone', note: s.drawdownFromHigh > 20 ? 'Lump sum territory' : s.drawdownFromHigh > 10 ? 'DCA Zone 3' : s.drawdownFromHigh > 5 ? 'DCA Zone 2' : 'Near highs — Zone 1', cls: s.drawdownFromHigh > 20 ? 'good' : s.drawdownFromHigh > 10 ? 'warn' : 'warn'},
+    {l:'Net Profit Margin', v: s.netMargin ? s.netMargin.toFixed(1)+'%' : '—', bench:'Good = above 20%', note: s.netMargin ? (s.netMargin > 20 ? 'Strong margins' : s.netMargin > 10 ? 'Moderate margins' : 'Thin margins') : 'N/A', cls: s.netMargin ? (s.netMargin > 20 ? 'good' : s.netMargin > 10 ? 'warn' : 'bad') : 'warn'},
+    {l:'Return on Equity', v: s.roe ? s.roe.toFixed(1)+'%' : '—', bench:'Good = above 15%', note: s.roe ? (s.roe > 15 ? 'Strong returns' : 'Below average') : 'N/A', cls: s.roe ? (s.roe > 15 ? 'good' : 'warn') : 'warn'},
+    {l:'Debt/Equity', v: s.debtEquity ? s.debtEquity.toFixed(2)+'x' : '—', bench:'Good = below 1x', note: s.debtEquity ? (s.debtEquity < 1 ? 'Low debt' : s.debtEquity < 2 ? 'Moderate' : 'High debt') : 'N/A', cls: s.debtEquity ? (s.debtEquity < 1 ? 'good' : s.debtEquity < 2 ? 'warn' : 'bad') : 'warn'},
+  ];
+
+  document.getElementById('modal-body').innerHTML = `
     <div class="modal-hdr">
-      <div><div class="modal-ticker">${a.ticker}</div><div class="modal-name">${a.name}</div></div>
+      <div>
+        <div class="modal-ticker">${s.ticker}</div>
+        <div class="modal-name">${s.name} · ${s.type}</div>
+        ${s.price ? `<div class="modal-price">$${s.price.toFixed(2)} <span style="color:${s.changeDay>=0?'var(--green)':'var(--red)'};font-size:14px">${s.changeDay>=0?'+':''}${s.changeDay.toFixed(2)}% today</span></div>` : ''}
+      </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="verdict-box ${vc}">
-      <div class="vbox-title" style="color:${vcol};font-size:15px">${a.verdict.toUpperCase()} — ${a.verdict==='bullish'?'Buy candidate':a.verdict==='neutral'?'Hold / DCA only':'Avoid as retirement core'}</div>
-      <div class="vbox-text" style="margin-top:6px">${a.action}</div>
+      <div class="vbox-title" style="color:${vcol};font-size:15px">${s.verdict==='bull'?'BULLISH':'s.verdict'==='neutral'?'NEUTRAL':'BEARISH'} — ${s.action}</div>
     </div>
-    <div class="sec-title">Technical picture</div><p class="analysis-p">${a.technical}</p>
-    <div class="sec-title">Fundamental picture — is the business healthy?</div><p class="analysis-p">${a.fundamental}</p>
-    <div class="sec-title">Recent news impact</div><p class="analysis-p">${a.news}</p>
-    <div class="sec-title">Key risks</div><p class="analysis-risk">${a.risk}</p>
-    <div class="sec-title">P/E benchmark explained</div>
-    <div class="pe-benchmark">
-      <strong>P/E ratio</strong> = how much you pay for every $1 of company profit. Like a price tag.<br>
-      ${a.ticker} = <strong style="color:${parseInt(a.pe)<parseInt(a.pe_sector)?'var(--green)':'var(--amber)'}"> ${a.pe}x</strong> vs sector avg <strong>${a.pe_sector}x</strong> — ${a.pe_note}.<br>
-      <strong>Simple rule:</strong> Below sector average = good value. Above = paying premium, needs strong growth to justify.
+    <div class="sec-title">Live signal</div>
+    <p style="font-size:13px;color:var(--text);line-height:1.7">${s.label} — ${s.detail}</p>
+    <div class="sec-title">P/E ratio explained</div>
+    <div class="pe-box">
+      <strong>P/E ratio</strong> = how much you pay for every $1 of profit. Like a price tag on the business.<br>
+      ${s.ticker} P/E = <strong style="color:${s.pe&&s.pe<s.pe_sector?'var(--green)':'var(--amber)'}"> ${s.pe ? s.pe.toFixed(1)+'x' : 'N/A'}</strong> vs sector avg <strong>${s.pe_sector}x</strong>.<br>
+      <strong>Simple rule:</strong> Below sector average = good value. Above = paying premium, needs growth to justify.
     </div>
-    <div class="sec-title">All metrics with benchmarks</div>
+    <div class="sec-title">All key metrics — live data with benchmarks</div>
     <table class="kmt">
-      <thead><tr><th>Metric</th><th>Value</th><th>What "good" looks like</th><th>Meaning</th><th>Rating</th></tr></thead>
-      <tbody>${a.metrics.map(m=>`<tr><td>${m.l}</td><td class="${m.cls}" style="font-family:var(--mono)">${m.v}</td><td style="color:var(--muted);font-size:11px">${m.bench}</td><td style="color:var(--text2)">${m.note}</td><td class="${m.cls}">${m.cls==='good'?'✓ Good':m.cls==='warn'?'~ OK':'✗ Concern'}</td></tr>`).join('')}</tbody>
-    </table>`;
+      <thead><tr><th>Metric</th><th>Live value</th><th>What "good" looks like</th><th>Reading</th><th>Rating</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr><td>${r.l}</td><td class="${r.cls}" style="font-family:var(--mono)">${r.v}</td><td style="color:var(--muted);font-size:11px">${r.bench}</td><td style="color:var(--text2)">${r.note}</td><td class="${r.cls}">${r.cls==='good'?'✓ Good':r.cls==='warn'?'~ OK':'✗ Concern'}</td></tr>`).join('')}</tbody>
+    </table>
+    <div style="margin-top:12px;font-size:11px;color:var(--muted);font-family:var(--mono);text-align:right">Live data from Finnhub · Updated ${new Date(Date.now()+8*3600000).toISOString().substr(11,8)} SGT</div>`;
+
   document.getElementById('modal').classList.add('open');
 }
 
-function closeModal(){document.getElementById('modal').classList.remove('open')}
-function closeModalBg(e){if(e.target===document.getElementById('modal'))closeModal()}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function closeModalBg(e){ if(e.target===document.getElementById('modal')) closeModal(); }
+
+// ── UI CONTROLS ───────────────────────────────────────────────────────────────
 
 function showTab(t){
   ['signals','analysis','dca','news','calc'].forEach((x,i)=>{
@@ -621,34 +728,36 @@ function showTab(t){
     document.getElementById('panel-'+x).classList.toggle('active',x===t);
   });
 }
-function filterSig(f,btn){sigF=f;document.querySelectorAll('#panel-signals .fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderSignals()}
-function filterAna(f,btn){anaF=f;document.querySelectorAll('#panel-analysis .fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderAnalysis()}
+function filterSig(f,btn){ sigFilter=f; document.querySelectorAll('#panel-signals .fbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); if(Object.keys(liveData).length) renderSignals(Object.values(liveData)); }
+function filterAna(f,btn){ anaFilter=f; document.querySelectorAll('#panel-analysis .fbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); if(Object.keys(liveData).length) renderAnalysis(Object.values(liveData)); }
 
-function fmt(n){if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';if(n>=1000)return'$'+Math.round(n/1000)+'K';return'$'+Math.round(n).toLocaleString()}
+function fmt(n){ if(n>=1e6) return '$'+(n/1e6).toFixed(2)+'M'; if(n>=1000) return '$'+Math.round(n/1000)+'K'; return '$'+Math.round(n).toLocaleString(); }
 
 function calc(){
-  const age=+document.getElementById('ra').value,P=+document.getElementById('rp').value;
-  const c=+document.getElementById('rc').value,r=+document.getElementById('rr').value/100;
-  const yrs=Math.max(0,50-age),mr=r/12,n=yrs*12;
+  const age=+document.getElementById('ra').value, P=+document.getElementById('rp').value;
+  const c=+document.getElementById('rc').value, r=+document.getElementById('rr').value/100;
+  const yrs=Math.max(0,50-age), mr=r/12, n=yrs*12;
   const fv=P*Math.pow(1+r,yrs)+c*(Math.pow(1+mr,n)-1)/mr;
-  const target=3e6,pct=Math.min(100,Math.round(fv/target*100));
-  const fvP=P*Math.pow(1+r,yrs),need=Math.max(0,(target-fvP)*mr/(Math.pow(1+mr,n)-1));
+  const target=3e6, pct=Math.min(100,Math.round(fv/target*100));
+  const fvP=P*Math.pow(1+r,yrs), need=Math.max(0,(target-fvP)*mr/(Math.pow(1+mr,n)-1));
   document.getElementById('vp').textContent=fmt(P);
   document.getElementById('vc').textContent=fmt(c)+'/mo';
   document.getElementById('vr').textContent=(+document.getElementById('rr').value).toFixed(1)+'%';
   document.getElementById('va').textContent=age;
-  const pr=document.getElementById('r-proj');pr.textContent=fmt(fv);pr.style.color=fv>=target?'var(--green)':'var(--amber)';
+  const pr=document.getElementById('r-proj'); pr.textContent=fmt(fv); pr.style.color=fv>=target?'var(--green)':'var(--amber)';
   document.getElementById('r-need').textContent=need>0?fmt(need)+'/mo':'On track';
   document.getElementById('r-yrs').textContent=yrs+' years';
-  const st=document.getElementById('r-stat');st.textContent=fv>=target?'On track':'Increase contributions';st.style.color=fv>=target?'var(--green)':'var(--amber)';
+  const st=document.getElementById('r-stat'); st.textContent=fv>=target?'On track':'Increase contributions'; st.style.color=fv>=target?'var(--green)':'var(--amber)';
   document.getElementById('prog-fill').style.width=pct+'%';
-  document.getElementById('prog-pct').textContent=pct+'% to goal';
+  document.getElementById('prog-pct').textContent=pct+'% to $3M goal';
 }
 
-function tick(){const t=new Date(Date.now()+8*3600000);document.getElementById('clock').textContent='SGT '+t.toISOString().substr(11,8)}
+function tick(){ const t=new Date(Date.now()+8*3600000); document.getElementById('clock').textContent='SGT '+t.toISOString().substr(11,8); }
 
-renderSignals();renderAnalysis();renderDCA();renderNews();calc();
-setInterval(tick,1000);tick();
+// ── INIT ──────────────────────────────────────────────────────────────────────
+calc();
+setInterval(tick,1000); tick();
+loadAllData();
 </script>
 </body>
 </html>
