@@ -34,11 +34,12 @@ def send_telegram(msg):
 
 def get_data(ticker):
     """
-    Fetch 6 months of daily price data from Yahoo Finance.
-    No API key needed. Completely free.
+    Fetch 2 years of daily adjusted close prices from Yahoo Finance.
+    Uses adjclose which is split and dividend adjusted — all prices
+    on the same scale regardless of splits. Free, no API key needed.
     """
     url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
-           f"?interval=1d&range=6mo"
+           f"?interval=1d&range=2y&events=adjsplit")
     headers = {"User-Agent": "Mozilla/5.0"}
     try:
         r = requests.get(url, headers=headers, timeout=15)
@@ -47,17 +48,29 @@ def get_data(ticker):
         if not result:
             print(f"  No data for {ticker}")
             return None
-        meta = result[0].get("meta", {})
-        closes = result[0].get("indicators", {}).get("quote", [{}])[0].get("close", [])
-        closes = [c for c in closes if c is not None]
-        if len(closes) < 20:
+
+        indicators = result[0].get("indicators", {})
+
+        # Use adjclose (split-adjusted) — this is the correct field
+        adjclose_data = indicators.get("adjclose", [{}])
+        adjcloses = adjclose_data[0].get("adjclose", []) if adjclose_data else []
+        adjcloses = [c for c in adjcloses if c is not None]
+
+        # Fallback to regular close if adjclose not available
+        if len(adjcloses) < 20:
+            closes = indicators.get("quote", [{}])[0].get("close", [])
+            adjcloses = [c for c in closes if c is not None]
+
+        if len(adjcloses) < 20:
             print(f"  Not enough data for {ticker}")
             return None
+
+        meta = result[0].get("meta", {})
+        price = meta.get("regularMarketPrice", adjcloses[-1])
+
         return {
-            "closes": closes,
-            "price": meta.get("regularMarketPrice", closes[-1]),
-            "high52": max(closes[-63:]) if len(closes) >= 63 else max(closes),  # 3 months post-split
-            "low52":  meta.get("fiftyTwoWeekLow",  min(closes)),
+            "adjcloses": adjcloses,  # oldest first, all split-adjusted
+            "price": price,
         }
     except Exception as e:
         print(f"  Error fetching {ticker}: {e}")
@@ -66,33 +79,28 @@ def get_data(ticker):
 def calc_weekly_rsi(daily_closes, period=14):
     """
     Calculate weekly RSI-14 using Wilder smoothing.
-    Converts daily closes to weekly (every 5 days) then applies RSI.
-    Matches TradingView weekly RSI-14, smoothing 1.
+    Converts daily closes to weekly (every 5 days).
+    Matches TradingView weekly RSI-14, length=14, smoothing=1.
+    daily_closes must be oldest-first.
     """
     if len(daily_closes) < period * 5 + 5:
         return None
-    # daily_closes is oldest-first from Yahoo
     weekly = [daily_closes[i] for i in range(0, len(daily_closes), 5)]
     if len(weekly) < period + 1:
         return None
     gains, losses = [], []
     for i in range(1, len(weekly)):
-        diff = weekly[i] - weekly[i-1]
+        diff = weekly[i] - weekly[i - 1]
         gains.append(max(diff, 0))
         losses.append(max(-diff, 0))
     avg_g = sum(gains[:period]) / period
     avg_l = sum(losses[:period]) / period
     for i in range(period, len(gains)):
-        avg_g = (avg_g * (period-1) + gains[i]) / period
-        avg_l = (avg_l * (period-1) + losses[i]) / period
+        avg_g = (avg_g * (period - 1) + gains[i]) / period
+        avg_l = (avg_l * (period - 1) + losses[i]) / period
     if avg_l == 0:
         return 100.0
-    return round(100 - (100 / (1 + avg_g/avg_l)), 1)
-
-def calc_sma(closes_newest_first, period):
-    if len(closes_newest_first) < period:
-        return None
-    return sum(closes_newest_first[:period]) / period
+    return round(100 - (100 / (1 + avg_g / avg_l)), 1)
 
 def get_dca_zone(rsi, drawdown):
     if rsi is not None and rsi < 35 and drawdown > 15:
@@ -118,53 +126,89 @@ def analyse(ticker, meta):
     if not raw:
         return signals, None
 
-    closes_old_first = raw["closes"]   # Yahoo returns oldest first
-    closes_new_first = list(reversed(closes_old_first))
+    adjcloses_old_first = raw["adjcloses"]    # oldest first, split-adjusted
+    adjcloses_new_first = list(reversed(adjcloses_old_first))
 
-    price    = raw["price"]
-    high52   = raw["high52"]
-    drawdown = ((high52 - price) / high52) * 100 if high52 > 0 else 0
+    price = raw["price"]
 
-    sma200 = calc_sma(closes_new_first, 200)
-    sma300 = calc_sma(closes_new_first, 300)
+    # True ATH from 2 years of split-adjusted data
+    # Scale it: adjcloses are adjusted, so we need ratio to get true ATH in current price terms
+    # The last adjclose corresponds to current price, so we scale proportionally
+    last_adj = adjcloses_old_first[-1]
+    scale = price / last_adj if last_adj > 0 else 1.0
+    ath = max(adjcloses_old_first) * scale
+
+    drawdown = ((ath - price) / ath) * 100 if ath > 0 else 0
+
+    # SMA200 and SMA300 from adjusted closes (scaled to current price)
+    adj_new_first_scaled = [c * scale for c in adjcloses_new_first]
+    sma200 = sum(adj_new_first_scaled[:200]) / 200 if len(adj_new_first_scaled) >= 200 else None
+    sma300 = sum(adj_new_first_scaled[:300]) / 300 if len(adj_new_first_scaled) >= 300 else None
     below_sma200 = (price < sma200) if sma200 else False
     below_sma300 = (price < sma300) if sma300 else False
 
-    # 5-day dip
+    # 5-day price dip using scaled adjusted closes
     weekly_drop = 0.0
-    if len(closes_new_first) >= 5:
-        price_5d_ago = closes_new_first[4]
+    if len(adj_new_first_scaled) >= 5:
+        price_5d_ago = adj_new_first_scaled[4]
         if price_5d_ago > 0:
             weekly_drop = ((price_5d_ago - price) / price_5d_ago) * 100
 
-    # Weekly RSI-14 calculated from daily data
-    rsi = calc_weekly_rsi(closes_old_first)
+    # Weekly RSI-14 from adjusted closes (scaled)
+    rsi = calc_weekly_rsi([c * scale for c in adjcloses_old_first])
 
-    print(f"  Price: ${price:.2f} | RSI-14w: {rsi} | Drawdown: {drawdown:.1f}% | SMA200: {'below' if below_sma200 else 'above'}")
+    print(f"  Price: ${price:.2f} | ATH: ${ath:.2f} | RSI-14w: {rsi} | Drawdown: {drawdown:.1f}% | SMA200: {'below' if below_sma200 else 'above'}")
 
     dca_zone, dca_action = get_dca_zone(rsi, drawdown)
 
     # Build Telegram signal strings
     if below_sma200 and sma200:
         pct = ((sma200 - price) / sma200) * 100
-        signals.append(f"🟢 {ticker}: BELOW SMA200 — STRONG BUY\nPrice ${price:.2f} is {pct:.1f}% below 200-day MA (${sma200:.2f})")
+        signals.append(
+            f"🟢 {ticker}: BELOW SMA200 — STRONG BUY\n"
+            f"Price ${price:.2f} is {pct:.1f}% below 200-day MA (${sma200:.2f})"
+        )
     if below_sma300 and sma300:
         pct = ((sma300 - price) / sma300) * 100
-        signals.append(f"🟩 {ticker}: BELOW SMA300 — MAXIMUM BUY\nPrice ${price:.2f} is {pct:.1f}% below 300-day MA (${sma300:.2f}). Generational entry.")
+        signals.append(
+            f"🟩 {ticker}: BELOW SMA300 — MAXIMUM BUY\n"
+            f"Price ${price:.2f} is {pct:.1f}% below 300-day MA (${sma300:.2f}). Generational entry."
+        )
     if rsi is not None and rsi < 30:
-        signals.append(f"🔵 {ticker}: RSI {rsi} — OVERSOLD STRONG BUY\nWeekly RSI-14 below 30. High probability mean reversion.")
+        signals.append(
+            f"🔵 {ticker}: RSI {rsi} — OVERSOLD STRONG BUY\n"
+            f"Weekly RSI-14 below 30. High probability mean reversion."
+        )
     if drawdown >= 20:
-        signals.append(f"🚨 {ticker}: {drawdown:.1f}% DRAWDOWN — DEPLOY LUMP SUM\nPrice ${price:.2f} is {drawdown:.1f}% off 52-week high (${high52:.2f})")
+        signals.append(
+            f"🚨 {ticker}: {drawdown:.1f}% DRAWDOWN — DEPLOY LUMP SUM\n"
+            f"Price ${price:.2f} is {drawdown:.1f}% off 2-year ATH (${ath:.2f})"
+        )
     elif drawdown >= 10:
-        signals.append(f"🟡 {ticker}: {drawdown:.1f}% PULLBACK — ADD POSITION\nPrice ${price:.2f} is {drawdown:.1f}% off 52-week high (${high52:.2f})")
+        signals.append(
+            f"🟡 {ticker}: {drawdown:.1f}% PULLBACK — ADD POSITION\n"
+            f"Price ${price:.2f} is {drawdown:.1f}% off 2-year ATH (${ath:.2f})"
+        )
     elif drawdown < 2:
-        signals.append(f"⚪ {ticker}: NEAR 52W HIGH — DCA ONLY\nPrice ${price:.2f} within {drawdown:.1f}% of 52-week high. No lump sum.")
+        signals.append(
+            f"⚪ {ticker}: NEAR ATH — DCA ONLY\n"
+            f"Price ${price:.2f} within {drawdown:.1f}% of 2-year ATH. No lump sum."
+        )
     if weekly_drop >= 15:
-        signals.append(f"📉 {ticker}: {weekly_drop:.1f}% WEEKLY DIP — STRONG BUY\nPrice fell {weekly_drop:.1f}% in 5 days.")
+        signals.append(
+            f"📉 {ticker}: {weekly_drop:.1f}% WEEKLY DIP — STRONG BUY\n"
+            f"Price fell {weekly_drop:.1f}% in 5 days."
+        )
     elif weekly_drop >= 10:
-        signals.append(f"🟡 {ticker}: {weekly_drop:.1f}% WEEKLY DIP — ADD POSITION\nPrice fell {weekly_drop:.1f}% in 5 days.")
+        signals.append(
+            f"🟡 {ticker}: {weekly_drop:.1f}% WEEKLY DIP — ADD POSITION\n"
+            f"Price fell {weekly_drop:.1f}% in 5 days."
+        )
     elif weekly_drop >= 5:
-        signals.append(f"👀 {ticker}: {weekly_drop:.1f}% WEEKLY DIP — WATCH\nPrice fell {weekly_drop:.1f}% in 5 days.")
+        signals.append(
+            f"👀 {ticker}: {weekly_drop:.1f}% WEEKLY DIP — WATCH\n"
+            f"Price fell {weekly_drop:.1f}% in 5 days."
+        )
 
     verdict = "bull" if dca_zone >= 3 else ("bear" if ticker == "TSLA" else "neutral")
 
@@ -174,7 +218,7 @@ def analyse(ticker, meta):
         "type":         meta["type"],
         "pe_sector":    meta.get("pe_sector", 25),
         "price":        round(price, 2),
-        "high52":       round(high52, 2),
+        "high52":       round(ath, 2),
         "drawdown":     round(drawdown, 2),
         "weekly_drop":  round(weekly_drop, 2),
         "rsi":          rsi,
@@ -193,7 +237,7 @@ def analyse(ticker, meta):
 def main():
     now = datetime.now().strftime("%Y-%m-%d %H:%M SGT")
     print(f"=== Stock Signal Bot starting {now} ===")
-    print(f"Data source: Yahoo Finance (no API key required)")
+    print(f"Data source: Yahoo Finance — split-adjusted prices, 2-year ATH")
 
     all_signals    = []
     watchlist_data = []
@@ -203,10 +247,10 @@ def main():
         all_signals.extend(sigs)
         if ticker_data:
             watchlist_data.append(ticker_data)
-        time.sleep(2)  # polite delay, Yahoo has no hard rate limit
+        time.sleep(2)
 
     buy_sigs  = [s for s in all_signals if any(x in s for x in ["BUY", "DRAWDOWN", "PULLBACK"])]
-    hold_sigs = [s for s in all_signals if "ATH" in s]
+    hold_sigs = [s for s in all_signals if "ATH" in s and "DEPLOY" not in s and "DRAWDOWN" not in s]
 
     lines = [
         "━━━━━━━━━━━━━━━━━━━━━━",
@@ -229,7 +273,11 @@ def main():
     if not buy_sigs and not hold_sigs:
         lines.append("✅ No major signals today.")
         lines.append("Stay the course. DCA as scheduled.")
-    lines += ["", "━━━━━━━━━━━━━━━━━━━━━━", f"📋 Watching: {', '.join(WATCHLIST)}"]
+    lines += [
+        "",
+        "━━━━━━━━━━━━━━━━━━━━━━",
+        f"📋 Watching: {', '.join(WATCHLIST)}",
+    ]
 
     msg = "\n".join(lines)
     print(msg)
