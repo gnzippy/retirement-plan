@@ -38,7 +38,7 @@ def get_data(ticker):
     No API key needed. Completely free.
     """
     url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
-           f"?interval=1d&range=6mo")
+           f"?interval=1d&range=1y")
     headers = {"User-Agent": "Mozilla/5.0"}
     try:
         r = requests.get(url, headers=headers, timeout=15)
@@ -56,7 +56,7 @@ def get_data(ticker):
         return {
             "closes": closes,
             "price": meta.get("regularMarketPrice", closes[-1]),
-            "high52": max(closes),  # use actual price data, not meta (avoids split price issues)
+            "high52": max(closes),  # use actual closes to avoid split-adjusted price mismatch
             "low52":  meta.get("fiftyTwoWeekLow",  min(closes)),
         }
     except Exception as e:
