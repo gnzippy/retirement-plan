@@ -56,7 +56,7 @@ def get_data(ticker):
         return {
             "closes": closes,
             "price": meta.get("regularMarketPrice", closes[-1]),
-            "high52": meta.get("fiftyTwoWeekHigh", max(closes)),
+            "high52": max(closes),  # use actual price data, not meta (avoids split price issues)
             "low52":  meta.get("fiftyTwoWeekLow",  min(closes)),
         }
     except Exception as e:
