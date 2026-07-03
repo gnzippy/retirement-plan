@@ -1,6 +1,7 @@
 {
-  "timestamp": "2026-07-02 22:58 SGT",
+  "timestamp": "2026-07-03 00:07 SGT",
   "signals": [
+    "\u26aa VOO: NEAR ATH \u2014 DCA ONLY\nPrice $684.84 within 1.6% of 2-year ATH. No lump sum.",
     "\u26aa SCHD: NEAR ATH \u2014 DCA ONLY\nPrice $32.39 within 0.6% of 2-year ATH. No lump sum.",
     "\ud83d\udfe1 GOOGL: 10.6% PULLBACK \u2014 ADD POSITION\nPrice $359.91 is 10.6% off 2-year ATH ($402.38)",
     "\ud83d\udfe1 AMZN: 11.8% PULLBACK \u2014 ADD POSITION\nPrice $242.67 is 11.8% off 2-year ATH ($274.99)",
@@ -18,6 +19,25 @@
     "\ud83d\udea8 NFLX: 42.0% DRAWDOWN \u2014 DEPLOY LUMP SUM\nPrice $77.65 is 42.0% off 2-year ATH ($133.91)"
   ],
   "watchlist": [
+    {
+      "ticker": "VOO",
+      "name": "Vanguard S&P 500 ETF",
+      "type": "ETF",
+      "pe_sector": 21,
+      "price": 684.84,
+      "high52": 696.23,
+      "drawdown": 1.64,
+      "weekly_drop": -2.18,
+      "rsi": 63.9,
+      "sma200": 632.9,
+      "sma300": 607.16,
+      "below_sma200": false,
+      "below_sma300": false,
+      "dca_zone": 1,
+      "dca_action": "Standard DCA only \u2014 no major signal",
+      "verdict": "neutral",
+      "signal_count": 1
+    },
     {
       "ticker": "VUG",
       "name": "Vanguard Growth ETF",
@@ -248,11 +268,11 @@
     }
   ],
   "summary": {
-    "total_tickers": 12,
+    "total_tickers": 13,
     "buy_signals": 14,
     "zone4_count": 3,
     "zone3_count": 4,
     "zone2_count": 2,
-    "zone1_count": 3
+    "zone1_count": 4
   }
 }
