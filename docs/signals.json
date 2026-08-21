@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-08-21 20:21 SGT",
+  "timestamp": "2026-08-21 22:15 SGT",
   "signals": [
-    "\u26aa VOO: NEAR ATH \u2014 DCA ONLY\nPrice $703.77 within 1.6% of 2-year ATH. No lump sum.",
+    "\u26aa VOO: NEAR ATH \u2014 DCA ONLY\nPrice $703.71 within 1.6% of 2-year ATH. No lump sum.",
     "\u26aa SCHD: NEAR ATH \u2014 DCA ONLY\nPrice $35.11 within 0.0% of 2-year ATH. No lump sum.",
     "\ud83d\udfe1 GOOGL: 14.3% PULLBACK \u2014 ADD POSITION\nPrice $344.82 is 14.3% off 2-year ATH ($402.38)",
     "\ud83d\udfe2 META: BELOW SMA200 \u2014 STRONG BUY\nPrice $549.90 is 11.8% below 200-day MA ($623.36)",
@@ -21,9 +21,9 @@
       "name": "Vanguard S&P 500 ETF",
       "type": "ETF",
       "pe_sector": 21,
-      "price": 703.77,
+      "price": 703.71,
       "high52": 714.95,
-      "drawdown": 1.56,
+      "drawdown": 1.57,
       "weekly_drop": 0.92,
       "rsi": 63.7,
       "sma200": 647.88,
