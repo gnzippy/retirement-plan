@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-17 21:29 SGT",
+  "timestamp": "2026-11-18 03:15 SGT",
   "signals": [
     "\ud83d\udfe2 VUG: BELOW SMA200 \u2014 STRONG BUY\nPrice $81.44 is 3.1% below 200-day MA ($84.07)",
     "\ud83d\udfe9 VUG: BELOW SMA300 \u2014 MAXIMUM BUY\nPrice $81.44 is 1.7% below 300-day MA ($82.88). Generational entry.",
@@ -35,11 +35,11 @@
       "name": "Vanguard S&P 500 ETF",
       "type": "ETF",
       "pe_sector": 21,
-      "price": 672.97,
+      "price": 673.19,
       "high52": 716.2,
-      "drawdown": 6.04,
-      "weekly_drop": 3.63,
-      "rsi": 44.1,
+      "drawdown": 6.01,
+      "weekly_drop": 3.6,
+      "rsi": 44.2,
       "sma200": 670.71,
       "sma300": 652.33,
       "below_sma200": false,
